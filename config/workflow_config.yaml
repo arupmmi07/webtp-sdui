@@ -1,0 +1,99 @@
+# Workflow Configuration
+
+workflow:
+  # Session configuration
+  session:
+    id_prefix: "SESSION"
+    max_concurrent_appointments: 50
+  
+  # Timeout configuration
+  timeouts:
+    patient_consent_hours: 24
+    patient_consent_reminder_hours: 12
+    backfill_hours: 6
+    manual_review_hours: 24
+  
+  # Retry configuration
+  retries:
+    max_candidate_offers: 3
+    max_backfill_attempts: 3
+    max_api_retries: 3
+  
+  # Priority scoring weights
+  priority:
+    no_show_risk_weight: 40
+    poc_urgency_weight: 30
+    revenue_weight: 20
+    satisfaction_risk_weight: 10
+  
+  # Priority levels
+  priority_levels:
+    high_threshold: 70
+    medium_threshold: 40
+    low_threshold: 0
+  
+  # Stage configuration
+  stages:
+    trigger:
+      enabled: true
+      timeout_seconds: 30
+    
+    filtering:
+      enabled: true
+      timeout_seconds: 15
+      min_qualified_candidates: 1
+    
+    scoring:
+      enabled: true
+      timeout_seconds: 10
+      min_candidates_to_score: 1
+      return_top_n: 3
+    
+    consent:
+      enabled: true
+      timeout_hours: 24
+      reminder_hours: 12
+      channels: ["sms", "email", "ivr"]
+    
+    backfill:
+      enabled: true
+      timeout_hours: 6
+      high_risk_threshold: 0.6
+      enable_hod_fallback: true
+    
+    audit:
+      enabled: true
+      log_to_file: true
+      log_to_database: false
+
+# HOD (Head of Department) Configuration
+hod:
+  provider_id: "P000"
+  name: "Dr. Robert Williams"
+  always_accept_overflow: true
+  require_manual_review: true
+  notify_on_assignment: true
+
+# Notification Configuration
+notifications:
+  patient:
+    confirmation_required: true
+    send_reminders: true
+    reminder_schedule_hours: [48, 24, 3]
+  
+  provider:
+    notify_on_new_assignment: true
+    include_patient_notes: true
+  
+  staff:
+    notify_on_manual_review: true
+    notify_on_hod_assignment: true
+    notify_on_errors: true
+
+# Audit Configuration
+audit:
+  retention_days: 2555  # 7 years (HIPAA requirement)
+  log_directory: "./audit_logs"
+  include_phi: false  # Don't log PHI in audit logs
+  log_format: "json"
+

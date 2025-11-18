@@ -1,0 +1,79 @@
+METRO PHYSICAL THERAPY
+Scheduling & Provider Assignment Policy
+Effective Date: January 2024
+Version: 1.0
+
+================================================================================
+SECTION 1: PROVIDER MATCHING RULES
+================================================================================
+
+1.1 Skills & Certification Requirements
+----------------------------------------
+The system must ensure providers have appropriate qualifications for each
+patient's condition:
+
+- Orthopedic Cases:
+  * Requires "Orthopedic PT" certification
+  * Examples: post-surgical knee, hip replacement, joint rehabilitation
+  
+- Neurological Cases:
+  * Requires "Neurological PT" certification
+  * Examples: stroke recovery, Parkinson's, spinal cord injury
+  
+- Pediatric Cases:
+  * Requires "Pediatric PT" certification
+  * Age restriction: Patients under 18 years
+
+- General Cases:
+  * General PT acceptable for: back pain, muscle strain, general mobility
+  * If no specialist available: General PT with 5+ years experience acceptable
+
+1.2 Location Constraints
+------------------------
+Provider location must be convenient for patient access:
+
+- Default Maximum Distance: 10 miles from patient's home address
+- Measurement: Calculated as driving distance (not straight-line)
+- Exception: Patient may explicitly request specific provider regardless of distance
+- Urban areas: Consider public transit accessibility
+- Rural areas: May extend to 25 miles if no closer options
+
+1.3 Availability Requirements
+------------------------------
+Provider must have availability within patient's scheduling window:
+
+- Default Window: ±3 days from original appointment date
+- Preferred: Same day and time as original appointment
+- Patient preferences (if specified):
+  * Preferred days: Monday-Friday
+  * Preferred times: Morning (7-12), Afternoon (12-5), Evening (5-8)
+
+================================================================================
+SECTION 2: SPECIAL CASES
+================================================================================
+
+2.1 Gender Preference
+---------------------
+When patient expresses gender preference:
+- MUST honor if "required" preference
+- SHOULD honor if "preferred" (unless no options available)
+- Document reason if unable to fulfill
+
+2.2 Continuity of Care
+----------------------
+When patient has prior history with providers:
+- Prioritize providers patient has seen before
+- Weight: High priority (40 points in scoring)
+- Especially important for chronic conditions
+
+2.3 Insurance/Payer Compliance
+-------------------------------
+Provider must be authorized for patient's insurance:
+- Refer to payer-specific rules (see Medicare_Coverage_Guidelines)
+- Check POC (Plan of Care) authorization
+- Verify provider NPI registration
+
+================================================================================
+END OF DOCUMENT
+================================================================================
+

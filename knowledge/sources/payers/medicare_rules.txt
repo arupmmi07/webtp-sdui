@@ -1,0 +1,188 @@
+MEDICARE PHYSICAL THERAPY COVERAGE
+Guidelines for Rehabilitation Services
+Based on CMS Regulations 2024
+Reference: CMS Manual Publication 100-02, Chapter 15
+
+================================================================================
+SECTION 1: PLAN OF CARE (POC) REQUIREMENTS
+================================================================================
+
+1.1 POC Authorization Mandate
+-----------------------------
+All Medicare patients MUST have an active Plan of Care (POC) before receiving
+physical therapy services.
+
+Requirements:
+- POC must be established and signed by a physician or qualified non-physician
+  practitioner (NPP)
+- POC must specify: diagnosis, treatment goals, frequency, duration
+- POC must be reviewed and re-certified every 90 days (or sooner if goals met)
+
+1.2 Visit Limits
+----------------
+Medicare coverage allows:
+- Initial Authorization: Up to 20 visits without requiring reauthorization
+- After 20 visits: Requires medical necessity documentation and re-evaluation
+- Maximum annual limit: Variable by condition (typically 100-150 visits/year)
+
+1.3 POC Expiration
+------------------
+POC expires when:
+- 90 days have passed since establishment/last certification
+- Maximum visits specified in POC are reached
+- Patient achieves treatment goals
+- Treatment is deemed no longer medically necessary
+
+Action Required:
+- URGENT: If POC expires within 7 days
+- WARNING: If POC expires within 14 days
+- ROUTINE: If POC expires > 14 days
+
+1.4 POC Approved Providers
+--------------------------
+For some Medicare Advantage plans:
+- POC may specify approved provider list
+- Provider changes may require physician approval
+- System MUST verify provider is on approved list before assignment
+
+================================================================================
+SECTION 2: PROVIDER REQUIREMENTS
+================================================================================
+
+2.1 Medicare Approval
+---------------------
+Provider must meet ALL of the following:
+- Active state PT license
+- NPI (National Provider Identifier) registered with Medicare
+- Enrolled in Medicare as a qualified provider
+- No exclusions or sanctions from federal healthcare programs
+
+2.2 Billing Requirements
+------------------------
+- Provider must bill using correct CPT codes
+- Documentation must support medical necessity
+- Services must be provided by or under supervision of licensed PT
+
+================================================================================
+SECTION 3: COVERAGE RULES
+================================================================================
+
+3.1 Covered Services
+--------------------
+Medicare Part B covers:
+- Therapeutic exercises
+- Manual therapy
+- Gait training
+- Modalities (heat, cold, ultrasound, etc.)
+- Evaluation and re-evaluation
+
+3.2 Non-Covered Services
+------------------------
+Medicare does NOT cover:
+- Maintenance therapy (unless under specific conditions)
+- Services provided primarily for patient convenience
+- Treatment without physician referral
+- Services not deemed medically necessary
+
+3.3 Medical Necessity
+---------------------
+Services must demonstrate:
+- Reasonable expectation of improvement
+- Skilled service requirement (cannot be self-administered)
+- Complexity requiring PT expertise
+- Documentation of functional limitations and goals
+
+================================================================================
+SECTION 4: SCHEDULING IMPLICATIONS
+================================================================================
+
+4.1 Provider Verification
+-------------------------
+Before assigning Medicare patient to new provider, system MUST verify:
+1. Provider is Medicare-approved (check NPI registration)
+2. Provider is on POC approved list (if applicable)
+3. POC is active and not expired
+4. Remaining authorized visits > 0
+
+4.2 POC Urgency Prioritization
+-------------------------------
+When scheduling replacements, prioritize patients by POC urgency:
+
+HIGH PRIORITY:
+- POC expires within 7 days
+- Only 1-2 visits remaining on current authorization
+- Patient at risk of no-show (losing covered visit)
+
+MEDIUM PRIORITY:
+- POC expires within 14 days
+- 3-5 visits remaining
+
+NORMAL PRIORITY:
+- POC expires > 14 days
+- Adequate visits remaining
+
+4.3 Authorization Holds
+-----------------------
+If provider assignment fails multiple times for Medicare patient:
+- Hold scheduling until POC reviewed
+- Alert front desk manager (Sarah)
+- May require physician contact for POC update/provider change approval
+
+================================================================================
+SECTION 5: COMPLIANCE NOTES
+================================================================================
+
+5.1 Audit Trail Requirements
+-----------------------------
+System must log:
+- POC verification performed
+- Provider Medicare enrollment verified
+- Medical necessity determination basis
+- All authorization checks
+
+5.2 Denial Risk Mitigation
+---------------------------
+To reduce claim denials:
+- Verify POC before every appointment
+- Ensure provider credentials current
+- Document medical necessity in each session note
+- Track visits against authorized limits
+
+5.3 Appeals Process
+-------------------
+If Medicare denies coverage:
+- Review documentation for completeness
+- Check for POC/provider mismatch
+- File appeal with supporting clinical documentation
+- Timeline: 120 days from denial date
+
+================================================================================
+REFERENCE CODES
+================================================================================
+
+Common CPT Codes for PT:
+- 97110: Therapeutic exercise
+- 97140: Manual therapy
+- 97530: Therapeutic activities
+- 97116: Gait training
+
+ICD-10 Codes (Examples):
+- M25.561: Pain in right knee
+- S83.511A: Sprain of anterior cruciate ligament of right knee, initial encounter
+- Z47.1: Aftercare following joint replacement surgery
+
+================================================================================
+CONTACT INFORMATION
+================================================================================
+
+Medicare Provider Helpline: 1-800-MEDICARE
+CMS Website: www.cms.gov
+Local Medicare Contractor: Refer to regional MAC
+
+================================================================================
+END OF DOCUMENT
+================================================================================
+
+
+
+
