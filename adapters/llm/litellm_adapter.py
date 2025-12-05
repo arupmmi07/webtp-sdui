@@ -1,15 +1,42 @@
-"""LiteLLM adapter with LangFuse integration for observability."""
+"""LiteLLM adapter with optional LangFuse integration for observability."""
 
 from typing import List, Dict, Any, Optional
 import os
-from litellm import completion, Router
-from langfuse import Langfuse
-from langfuse.decorators import observe, langfuse_context
 
-from interfaces.llm_provider import LLMProvider, LLMResponse, ToolCall
+# Try to import LiteLLM components
+try:
+    from litellm import completion
+    LITELLM_AVAILABLE = True
+except ImportError:
+    LITELLM_AVAILABLE = False
+    print("[LiteLLM] Warning: litellm package not installed")
+
+# Try to import LangFuse (optional)
+try:
+    from langfuse import Langfuse
+    from langfuse.decorators import observe, langfuse_context
+    LANGFUSE_AVAILABLE = True
+except ImportError:
+    LANGFUSE_AVAILABLE = False
+    # Create dummy decorators
+    def observe(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator if args and callable(args[0]) else decorator
+
+from adapters.llm.base import BaseLLM
 
 
-class LiteLLMAdapter(LLMProvider):
+class LLMResponse:
+    """Simple response object."""
+    def __init__(self, content: str, stop_reason: str = None, usage: dict = None, tool_calls: list = None):
+        self.content = content
+        self.stop_reason = stop_reason
+        self.usage = usage or {}
+        self.tool_calls = tool_calls or []
+
+
+class LiteLLMAdapter(BaseLLM):
     """
     LiteLLM adapter with LangFuse observability.
     
@@ -22,20 +49,29 @@ class LiteLLMAdapter(LLMProvider):
     
     def __init__(
         self,
-        model: str = "claude-sonnet",
+        model: str = "gpt-oss-20b",
+        api_base: str = None,
+        api_key: str = None,
         config_path: Optional[str] = None,
-        enable_langfuse: bool = True
+        enable_langfuse: bool = False
     ):
         """
         Initialize LiteLLM adapter.
         
         Args:
-            model: Model name from litellm_config.yaml
+            model: Model name (e.g., "gpt-oss-20b", "claude-sonnet-4")
+            api_base: API base URL (e.g., "http://localhost:4000")
+            api_key: API key for authentication
             config_path: Path to litellm_config.yaml (optional)
-            enable_langfuse: Enable LangFuse tracing
+            enable_langfuse: Enable LangFuse tracing (requires langfuse package)
         """
+        if not LITELLM_AVAILABLE:
+            raise ImportError("litellm package not installed. Run: pip install litellm")
+        
         self.model = model
-        self.enable_langfuse = enable_langfuse
+        self.api_base = api_base
+        self.api_key = api_key
+        self.enable_langfuse = enable_langfuse and LANGFUSE_AVAILABLE
         
         # Initialize LangFuse if enabled
         if self.enable_langfuse:
@@ -44,14 +80,18 @@ class LiteLLMAdapter(LLMProvider):
                 secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
                 host=os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com")
             )
+        else:
+            self.langfuse = None
         
         # Initialize LiteLLM Router (if config provided)
         self.router = None
         if config_path:
-            # Router enables fallbacks, load balancing, etc.
-            self.router = Router(config_path=config_path)
+            try:
+                from litellm import Router
+                self.router = Router(config_path=config_path)
+            except ImportError:
+                print("[LiteLLM] Warning: Router not available")
     
-    @observe(name="llm_generate", capture_input=True, capture_output=True)
     def generate(
         self,
         prompt: str,
@@ -59,7 +99,8 @@ class LiteLLMAdapter(LLMProvider):
         tools: Optional[List[Dict[str, Any]]] = None,
         max_tokens: int = 4096,
         temperature: float = 0.7,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
+        **kwargs
     ) -> LLMResponse:
         """
         Generate response using LiteLLM with LangFuse tracing.
@@ -82,34 +123,43 @@ class LiteLLMAdapter(LLMProvider):
         messages.append({"role": "user", "content": prompt})
         
         # Add metadata to LangFuse trace
-        if self.enable_langfuse and metadata:
-            langfuse_context.update_current_trace(
-                user_id=metadata.get("user_id"),
-                session_id=metadata.get("session_id"),
-                tags=metadata.get("tags", []),
-                metadata=metadata
-            )
+        if self.enable_langfuse and metadata and LANGFUSE_AVAILABLE:
+            try:
+                langfuse_context.update_current_trace(
+                    user_id=metadata.get("user_id"),
+                    session_id=metadata.get("session_id"),
+                    tags=metadata.get("tags", []),
+                    metadata=metadata
+                )
+            except:
+                pass  # Ignore LangFuse errors
         
         try:
-            # Call LiteLLM (automatically traces to LangFuse if configured)
+            # Build kwargs for completion call
+            completion_kwargs = {
+                "model": self.model,
+                "messages": messages,
+                "max_tokens": max_tokens,
+                "temperature": temperature,
+            }
+            
+            # Add API base and key if provided
+            if self.api_base:
+                completion_kwargs["api_base"] = self.api_base
+            if self.api_key:
+                completion_kwargs["api_key"] = self.api_key
+            
+            # Add tools if provided
+            if tools:
+                completion_kwargs["tools"] = tools
+            
+            # Call LiteLLM
             if self.router:
                 # Use router for fallbacks
-                response = self.router.completion(
-                    model=self.model,
-                    messages=messages,
-                    max_tokens=max_tokens,
-                    temperature=temperature,
-                    tools=tools if tools else None
-                )
+                response = self.router.completion(**completion_kwargs)
             else:
                 # Direct completion
-                response = completion(
-                    model=self.model,
-                    messages=messages,
-                    max_tokens=max_tokens,
-                    temperature=temperature,
-                    tools=tools if tools else None
-                )
+                response = completion(**completion_kwargs)
             
             # Extract content and tool calls
             message = response.choices[0].message
@@ -119,11 +169,11 @@ class LiteLLMAdapter(LLMProvider):
             tool_calls = []
             if hasattr(message, "tool_calls") and message.tool_calls:
                 for tc in message.tool_calls:
-                    tool_calls.append(ToolCall(
-                        id=tc.id,
-                        name=tc.function.name,
-                        arguments=tc.function.arguments
-                    ))
+                    tool_calls.append({
+                        "id": tc.id,
+                        "name": tc.function.name,
+                        "arguments": tc.function.arguments
+                    })
             
             # Extract usage
             usage = {}
@@ -143,11 +193,14 @@ class LiteLLMAdapter(LLMProvider):
         
         except Exception as e:
             # Log error to LangFuse
-            if self.enable_langfuse:
-                langfuse_context.update_current_observation(
-                    level="ERROR",
-                    status_message=str(e)
-                )
+            if self.enable_langfuse and LANGFUSE_AVAILABLE:
+                try:
+                    langfuse_context.update_current_observation(
+                        level="ERROR",
+                        status_message=str(e)
+                    )
+                except:
+                    pass  # Ignore LangFuse errors
             raise
     
     def parse_document(self, file_path: str) -> str:

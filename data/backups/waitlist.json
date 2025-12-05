@@ -1,0 +1,53 @@
+[
+  {
+    "waitlist_id": "WL002",
+    "patient_id": "PAT005",
+    "name": "Tom Anderson",
+    "condition": "Shoulder pain",
+    "no_show_risk": 0.65,
+    "priority": "MEDIUM",
+    "requested_specialty": "Physical Therapy",
+    "requested_location": "Downtown",
+    "availability_windows": {
+      "days": [
+        "Monday",
+        "Tuesday",
+        "Thursday"
+      ],
+      "times": [
+        "Morning"
+      ]
+    },
+    "insurance": "Medicare",
+    "current_appointment": null,
+    "willing_to_move_up": true,
+    "added_to_waitlist": "2025-11-16T10:30:00Z",
+    "notes": "Flexible schedule, prefers downtown location"
+  },
+  {
+    "patient_id": "PAT001",
+    "name": "Maria Rodriguez",
+    "condition": "post-surgical knee",
+    "no_show_risk": 0.05,
+    "priority": "HIGH",
+    "requested_specialty": "Physical Therapy",
+    "requested_location": "Any",
+    "availability_windows": {
+      "days": [
+        "Monday",
+        "Wednesday",
+        "Friday"
+      ],
+      "times": [
+        "Morning",
+        "Afternoon"
+      ]
+    },
+    "insurance": "Unknown",
+    "current_appointment": null,
+    "willing_to_move_up": true,
+    "added_to_waitlist": "2025-11-20T21:26:12.477240Z",
+    "notes": "Original patient declined all providers, needs rescheduling",
+    "waitlist_id": "WL003"
+  }
+]

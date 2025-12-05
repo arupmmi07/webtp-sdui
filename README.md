@@ -8,15 +8,26 @@ When a therapist calls in sick, this system automatically finds the best replace
 
 ## 🚀 Quick Start
 
-### Option 1: Launch UI (Recommended)
+### Option 1: Docker (Recommended - Includes LiteLLM)
 
 ```bash
-make dev
+# Start all services (API + UI + LiteLLM)
+make docker-up
+
+# Access UI at http://localhost:8501
+# Access LiteLLM at http://localhost:4000
 ```
 
-This opens a **ChatGPT-like web interface** at http://localhost:8501
+### Option 2: Local Development
 
-### Option 2: Launch CLI
+```bash
+# Start API and UI locally
+make dev
+
+# Opens at http://localhost:8501
+```
+
+### Option 3: CLI
 
 ```bash
 make cli
@@ -57,20 +68,24 @@ pip3 install -r requirements.txt
 ```bash
 make help          # Show all commands
 
-# Development
-make dev           # 🚀 Launch Chat UI
+# Docker (Recommended)
+make docker-up       # 🐳 Start all services (API + UI + LiteLLM)
+make docker-down     # 🛑 Stop all services
+make docker-logs     # 📋 View logs
+make docker-restart  # 🔄 Restart services
+make docker-clean    # 🧹 Clean Docker resources
+
+# Local Development
+make dev           # 🚀 Launch Chat UI + API locally
 make cli           # 💻 Launch CLI
 make install       # 📦 Install dependencies
 
 # Testing
 make test          # 🧪 Run all tests
-make test-agents   # 🤖 Test agents
-make validate      # ✅ Validate system
 
 # Utilities
 make clean         # 🧹 Clean cache
-make docs          # 📚 Open docs
-make status        # 📊 System status
+make clean-all     # 🗑️ Remove venv + cache
 ```
 
 ---
@@ -98,18 +113,67 @@ Dr. Sarah Johnson (T001) calls in sick. The system automatically:
 
 ---
 
-## 🎭 Mock Mode
+## 🎭 Three Modes Available
 
-Currently running in **mock mode**:
-- 🟡 No real LLM API calls (hardcoded responses)
-- 🟡 No real SMS/email (prints to console)
-- 🟡 Using test data (Maria + 3 providers)
-- 🟢 Real workflow orchestration
-- 🟢 Real event logging
+### Option 1: Mock Mode (Default) - **$0/month**
+- 🟡 Hardcoded LLM responses
+- ✅ Perfect for initial demos
+- ✅ No setup needed
+```bash
+make docker-up
+```
 
-**Cost:** $0 (fully mocked)
+### Option 2: Local Model (LM Studio) - **$0/month** ⭐ NEW
+- ✅ **FREE** - No API costs!
+- ✅ Private - data stays on your machine
+- ✅ Fast (with GPU)
+- 📚 Best for development & testing
 
-See `docs/MOCKS.md` for how to swap to real services.
+```bash
+# 1. Download LM Studio: https://lmstudio.ai
+# 2. Start server (port 1234)
+# 3. Configure
+bash scripts/setup-env.sh
+nano .env
+# Set: USE_MOCK_LLM=false
+# Set: USE_LOCAL_MODEL=true
+
+# 4. Start
+make docker-up
+```
+
+**See:** `docs/LM_STUDIO_SETUP.md` for complete guide
+
+### Option 3: Cloud API (Anthropic/OpenAI) - **$50-150/month**
+- ✅ Best quality
+- ✅ No hardware needed
+- ✅ Very fast
+- ⚠️ Costs money (budget-protected at $5/day)
+
+```bash
+# 1. Get API key: https://console.anthropic.com
+# 2. Configure
+bash scripts/setup-env.sh
+nano .env
+# Set: ANTHROPIC_API_KEY=sk-ant-api03-...
+# Set: USE_MOCK_LLM=false
+# Set: USE_LOCAL_MODEL=false
+
+# 3. Start
+make docker-up
+```
+
+**LiteLLM Features:**
+- ✅ Unified API for all providers
+- ✅ Auto fallbacks (local → Claude → GPT-4)
+- ✅ Cost tracking ($5/day limit)
+- ✅ Request caching
+- ✅ Rate limiting
+
+**Recommended Strategy:**
+- **Dev/Testing**: Local models (FREE)
+- **Staging**: Claude Haiku ($10-20/month)
+- **Production**: Claude Sonnet ($50-150/month)
 
 ---
 
@@ -148,37 +212,63 @@ See `docs/MOCKS.md` for how to swap to real services.
 
 | Document | Description |
 |----------|-------------|
+| **`docs/LM_STUDIO_SETUP.md`** | Use FREE local models (LM Studio) ⭐ NEW |
+| **`docker/README.md`** | Docker deployment guide |
+| **`DOCKER_SETUP.md`** | Quick Docker + LiteLLM setup |
+| **`config/cost_limits.yaml`** | Detailed cost breakdown |
 | **`docs/UI_QUICKSTART.md`** | How to use the web UI |
 | **`docs/MOCKS.md`** | What's mocked & how to swap |
-| **`docs/QUICKSTART_DEMO.md`** | 30-second quick start |
-| **`docs/ARCHITECTURE.md`** | System architecture |
-| **`docs/USE_CASES.md`** | All 6 use cases |
-| **`docs/CHAT_UI_COMPARISON.md`** | Why we chose Streamlit |
+| **`DEMO_GUIDE.md`** | Patient email simulation guide |
+| **`DEMO_STORY.md`** | Simple demo narrative |
+| **`docs/LANGGRAPH_EXPLAINED.md`** | LangGraph workflow explanation |
+| **`docs/USE_CASES_SIMPLIFIED.md`** | 6 use cases (current demo) ⭐ |
+| **`docs/USE_CASES.md`** | 6 use cases (full vision) |
 
 ---
 
 ## 🔄 Next Steps
 
-### Immediate
-1. ✅ Run the demo: `make dev`
-2. ✅ Test the workflow: `therapist departed T001`
-3. ✅ Show to stakeholders
+### Immediate (5 minutes)
+```bash
+# Option A: Docker (includes LiteLLM)
+make docker-up
 
-### Week 1 (Swap to Real LLM)
-1. Get API keys (Anthropic, LangFuse)
-2. Run: `pip install litellm langfuse`
-3. Change 1 line in agent code
-4. Test with real AI decisions
-5. **Effort:** ~4 hours
+# Option B: Local development
+make install && make dev
+```
 
-### Week 2-4 (Production Ready)
-- Add PDF parsing for knowledge
-- Connect to database/WebPT API
-- Add real SMS/email via Twilio/SendGrid
-- Deploy to cloud
-- **Effort:** ~3 weeks
+### Week 1 (Swap to Real LLM) - **~2 hours**
+```bash
+# 1. Get Anthropic API key
+# Sign up at https://console.anthropic.com
 
-See `docs/MOCKS.md` for detailed swap instructions.
+# 2. Configure .env
+cp .env.example .env
+# Add: ANTHROPIC_API_KEY=sk-ant-api03-...
+
+# 3. Start with real LLM
+USE_MOCK_LLM=false make docker-up
+
+# 4. Test
+# Type: "therapist departed T001"
+# Watch real Claude AI make decisions!
+```
+
+**Benefits:**
+- ✅ Real AI decision making
+- ✅ Adapts to complex scenarios
+- ✅ No hardcoded logic
+- ✅ Better than rule-based systems
+
+### Week 2-4 (Production Ready) - **~3 weeks**
+- [ ] Add PDF parsing for compliance documents
+- [ ] Connect to WebPT API / database
+- [ ] Add real SMS/email (Twilio/SendGrid)
+- [ ] Add authentication (OAuth)
+- [ ] Deploy to cloud (AWS/Azure/GCP)
+- [ ] Add monitoring (Prometheus/Grafana)
+
+See `docker/README.md` for deployment guide.
 
 ---
 
@@ -221,16 +311,39 @@ All tests should pass! ✅
 
 ---
 
-## 💰 Cost Tracking
+## 💰 Cost Comparison
 
-| Component | Mock Cost | Real Cost (Monthly) |
-|-----------|-----------|-------------------|
-| LLM (LiteLLM) | $0 | ~$20-50 |
-| LangFuse | $0 | $0 (free tier) |
-| Streamlit | $0 | $0 (open source) |
-| Database (optional) | $0 | ~$25 (Supabase) |
-| SMS/Email (optional) | $0 | ~$50 (Twilio+SendGrid) |
-| **Total** | **$0** | **~$95-125/month** |
+| Mode | Setup | Per Workflow | Monthly (100 workflows/day) |
+|------|-------|--------------|----------------------------|
+| **Mock** | None | $0 | $0 |
+| **Local Model** ⭐ | LM Studio | $0 | **$0** |
+| **Cloud API** | API key | $0.035 | $50-150 (budget-protected) |
+
+### Local Model (LM Studio) - FREE!
+- ✅ **$0/month** - No API costs
+- ✅ Unlimited workflows
+- ✅ 100% private
+- ⚠️ Requires good computer (8GB+ RAM, GPU recommended)
+
+### Cloud API (Budget-Protected)
+- **Hard cap**: $5/day (enforced by LiteLLM)
+- **Max monthly**: $150 (30 days × $5)
+- **Typical**: $50-75/month (50-100 workflows/day)
+- **Alert**: $4/day (80% threshold)
+
+**Daily Usage:**
+- 10 workflows = $0.35/day = ~$10/month
+- 50 workflows = $1.75/day = ~$50/month  
+- 100 workflows = $3.50/day = ~$100/month
+- 140+ workflows = Budget limit hit
+
+**Full Stack (Production):**
+- LLM: $0 (local) or $50-150 (cloud)
+- Database: ~$25 (Supabase)
+- SMS/Email: ~$50 (Twilio/SendGrid)
+- **Total**: $75-225/month
+
+See `config/cost_limits.yaml` for detailed breakdown.
 
 ---
 
@@ -287,25 +400,39 @@ This is a demo/prototype system. Future enhancements:
 
 ## ⚡ TL;DR
 
+### Quick Start (Docker)
 ```bash
-# Install
-make install
+# Start everything (API + UI + LiteLLM)
+make docker-up
 
-# Run UI
-make dev
+# Open browser
+open http://localhost:8501
 
-# Try command
+# Type command
 therapist departed T001
 
 # 🎉 Watch it work!
 ```
 
+### Quick Start (Local)
+```bash
+# Install
+make install
+
+# Run UI + API
+make dev
+
+# Try it
+therapist departed T001
+```
+
 ---
 
-**Built with:** Mock-first methodology + Streamlit UI  
-**Status:** Demo-ready, production-ready architecture  
-**Timeline:** 2-3 days to build, 2-3 weeks to production  
-**Cost:** $0 (mocks) → $95-125/month (production)
+**Built with:** LangGraph + Streamlit + LiteLLM + MCP  
+**Architecture:** Modular, vendor-agnostic, production-ready  
+**Timeline:** 5 min (demo) → 2 hours (real LLM) → 3 weeks (production)  
+**Cost:** $0 (mocks) → $50-75/month (LLM) → $125-150/month (full stack)  
+**Budget:** **$5/day hard limit** (protected by LiteLLM)
 
-🚀 **Ready to demo!**
+🚀 **Ready to demo!** 🐳 **Docker-ready!** 💰 **Budget-protected!**
 

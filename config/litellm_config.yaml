@@ -1,136 +1,125 @@
-# LiteLLM Configuration
-# Unified LLM gateway with automatic fallbacks and load balancing
+# LiteLLM Proxy Configuration
+# This acts as a unified gateway for all LLM providers
 
 model_list:
-  # Primary: Anthropic Claude
-  - model_name: claude-sonnet
+  # LM Studio - Local Models (FREE - No API key needed)
+  - model_name: local-llama
+    litellm_params:
+      model: openai/local-model  # LM Studio uses OpenAI-compatible API
+      api_base: http://host.docker.internal:1234/v1  # LM Studio default port
+      api_key: "lm-studio"  # Any value works, LM Studio doesn't validate
+      max_tokens: 4096
+      temperature: 0.7
+      
+  - model_name: local-mistral
+    litellm_params:
+      model: openai/local-model
+      api_base: http://host.docker.internal:1234/v1
+      api_key: "lm-studio"
+      max_tokens: 4096
+      temperature: 0.7
+      
+  - model_name: gpt-oss-20b
+    litellm_params:
+      model: openai/gpt-oss-20b  # GPT-OSS-20B model
+      api_base: http://host.docker.internal:1234/v1
+      api_key: "lm-studio"
+      max_tokens: 8192
+      temperature: 0.7
+
+  # Anthropic Claude Models (requires API key)
+  - model_name: claude-sonnet-4
     litellm_params:
       model: anthropic/claude-sonnet-4-20250514
-      api_key: ${ANTHROPIC_API_KEY}
-      timeout: 60
-      max_retries: 3
-  
-  # Fallback 1: OpenAI GPT-4 (if Claude fails)
-  - model_name: gpt-4-fallback
-    litellm_params:
-      model: gpt-4-turbo
-      api_key: ${OPENAI_API_KEY}
-      timeout: 60
-      max_retries: 2
-  
-  # Fallback 2: Google Gemini (if both fail)
-  - model_name: gemini-fallback
-    litellm_params:
-      model: gemini/gemini-pro
-      api_key: ${GEMINI_API_KEY}
-      timeout: 60
-      max_retries: 2
-  
-  # Local/Development: Ollama (free, no API key)
-  - model_name: ollama-local
-    litellm_params:
-      model: ollama/llama2
-      api_base: http://localhost:11434
-      timeout: 120
+      api_key: os.environ/ANTHROPIC_API_KEY
+      max_tokens: 8192
+      temperature: 0.7
 
-# Router Configuration
+  - model_name: claude-sonnet-3.5
+    litellm_params:
+      model: anthropic/claude-3-5-sonnet-20241022
+      api_key: os.environ/ANTHROPIC_API_KEY
+      max_tokens: 8192
+      temperature: 0.7
+
+  - model_name: claude-haiku-3.5
+    litellm_params:
+      model: anthropic/claude-3-5-haiku-20241022
+      api_key: os.environ/ANTHROPIC_API_KEY
+      max_tokens: 8192
+      temperature: 0.7
+
+  # OpenAI Models (optional - requires API key)
+  - model_name: gpt-4o
+    litellm_params:
+      model: openai/gpt-4o
+      api_key: os.environ/OPENAI_API_KEY
+      max_tokens: 4096
+      temperature: 0.7
+
+  - model_name: gpt-4o-mini
+    litellm_params:
+      model: openai/gpt-4o-mini
+      api_key: os.environ/OPENAI_API_KEY
+      max_tokens: 4096
+      temperature: 0.7
+
+# Router Configuration (for load balancing, fallbacks)
 router_settings:
-  # Automatic fallback chain
-  fallbacks:
-    - claude-sonnet
-    - gpt-4-fallback
-    - gemini-fallback
+  routing_strategy: simple-shuffle  # Options: simple-shuffle, least-busy, latency-based-routing
+  model_group_alias:
+    local: ["gpt-oss-20b", "local-llama", "local-mistral"]  # FREE - LM Studio models
+    production: ["claude-sonnet-4", "claude-sonnet-3.5"]
+    fast: ["claude-haiku-3.5", "gpt-4o-mini"]
+    fallback: ["gpt-4o", "claude-sonnet-3.5"]
+    dev: ["gpt-oss-20b", "local-llama", "claude-haiku-3.5"]  # Local first, then cheap API
+
+# General Settings
+general_settings:
+  # Store prompts and responses in database for tracing
+  store_model_in_db: true
+  store_prompts_in_spend_logs: true
   
-  # Load balancing (if multiple instances)
-  routing_strategy: simple-shuffle  # Options: simple-shuffle, least-busy, latency-based
-  
-  # Rate limiting
-  rpm: 500  # Requests per minute
-  tpm: 100000  # Tokens per minute
-  
-  # Caching (reduce costs)
-  cache:
-    type: redis  # Options: redis, disk, memory
-    ttl: 3600  # Cache TTL in seconds
-  
-  # Retries
+litellm_settings:
+  # Caching (disabled - redis not configured)
+  cache: false
+  # cache_params:
+  #   type: redis
+  #   host: redis
+  #   port: 6379
+    
+  # Retry & Timeout
+  # num_retries: How many times to retry on failure
+  # request_timeout: Max seconds to wait for LLM response (default: 600 = 10 minutes)
   num_retries: 3
-  timeout: 60
+  request_timeout: 600  # Increase this if you get timeouts (e.g., 1200 for 20 min)
   
-  # Cost tracking
-  track_cost_per_model: true
-
-# Default model to use
-default_model: claude-sonnet
-
-# LangFuse Integration
-langfuse:
-  enabled: true
-  public_key: ${LANGFUSE_PUBLIC_KEY}
-  secret_key: ${LANGFUSE_SECRET_KEY}
-  host: ${LANGFUSE_HOST:-https://cloud.langfuse.com}
+  # Note: Fallbacks removed - use model_group_alias in router_settings instead
+  # This avoids configuration conflicts with LiteLLM's fallback format
   
-  # What to track
-  trace_requests: true
-  trace_responses: true
-  track_usage: true
-  track_costs: true
+  # Rate Limiting (per model) - TOTAL BUDGET: $5/day
+  model_max_budget:
+    claude-sonnet-4: 3.00      # $3/day (primary)
+    claude-sonnet-3.5: 1.50    # $1.50/day (fallback)
+    claude-haiku-3.5: 0.50     # $0.50/day (fast/cheap)
+    gpt-4o: 1.00               # $1/day (fallback)
+    gpt-4o-mini: 0.25          # $0.25/day (very cheap)
   
-  # Tags for filtering in LangFuse UI
-  default_tags:
-    - therapist-replacement
-    - production
-    - smart-scheduling
+  # Logging
+  success_callback: ["langfuse"]
+  failure_callback: ["langfuse"]
 
-# Environment-specific settings
-environments:
-  development:
-    default_model: ollama-local
-    langfuse:
-      enabled: false
-  
-  staging:
-    default_model: claude-sonnet
-    langfuse:
-      enabled: true
-      default_tags:
-        - therapist-replacement
-        - staging
-  
-  production:
-    default_model: claude-sonnet
-    fallbacks_enabled: true
-    langfuse:
-      enabled: true
-      default_tags:
-        - therapist-replacement
-        - production
+# Callbacks (Observability)
+callbacks:
+  langfuse:
+    langfuse_public_key: os.environ/LANGFUSE_PUBLIC_KEY
+    langfuse_secret_key: os.environ/LANGFUSE_SECRET_KEY
+    langfuse_host: os.environ/LANGFUSE_HOST
 
-# Prompt Management via LangFuse
-prompts:
-  # Prompts are managed in LangFuse UI, referenced by name
-  use_langfuse_prompts: true
-  
-  # Prompt names (defined in LangFuse)
-  prompt_names:
-    orchestrator_system: "therapist-replacement-orchestrator-v1"
-    matching_agent: "smart-scheduling-matching-v1"
-    scoring_agent: "smart-scheduling-scoring-v1"
-    consent_agent: "patient-engagement-consent-v1"
-    backfill_agent: "smart-scheduling-backfill-v1"
-
-# Monitoring & Alerts
-monitoring:
-  log_level: INFO
-  log_requests: true
-  log_responses: false  # Don't log full responses (can be large)
-  
-  # Alert thresholds
-  alerts:
-    error_rate_threshold: 0.05  # Alert if >5% errors
-    latency_threshold_ms: 5000  # Alert if >5s latency
-    cost_threshold_daily: 100   # Alert if daily cost >$100
-
-
-
-
+# Environment Variables
+environment_variables:
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+  OPENAI_API_KEY: ${OPENAI_API_KEY}
+  LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+  LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+  LANGFUSE_HOST: ${LANGFUSE_HOST}

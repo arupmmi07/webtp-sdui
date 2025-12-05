@@ -13,9 +13,9 @@ from pathlib import Path
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from agents.smart_scheduling_agent import create_smart_scheduling_agent
-from agents.patient_engagement_agent import create_patient_engagement_agent
-from mcp_servers.domain.server import create_domain_server
+from agents.smart_scheduling_agent import SmartSchedulingAgent
+from agents.patient_engagement_agent import PatientEngagementAgent
+from mcp_servers.domain.json_server import create_json_domain_server as create_domain_server
 
 
 class SimpleWorkflowOrchestrator:
@@ -33,11 +33,16 @@ class SimpleWorkflowOrchestrator:
     Can be enhanced later with state machines and parallel processing.
     """
     
-    def __init__(self):
+    def __init__(
+        self,
+        smart_scheduling_agent=None,
+        patient_engagement_agent=None,
+        domain_server=None
+    ):
         """Initialize orchestrator with agents."""
-        self.scheduling_agent = create_smart_scheduling_agent()
-        self.engagement_agent = create_patient_engagement_agent()
-        self.domain_server = create_domain_server()
+        self.scheduling_agent = smart_scheduling_agent or SmartSchedulingAgent()
+        self.engagement_agent = patient_engagement_agent or PatientEngagementAgent()
+        self.domain_server = domain_server or create_domain_server()
         
         self.events = []  # Event log for audit
         
@@ -173,6 +178,9 @@ class SimpleWorkflowOrchestrator:
             )
             book_result['confirmation_sent'] = confirm_result['confirmation_sent']
         
+        # Include booking data for reference
+        book_result['booking_data'] = booking_data
+        
         return book_result
     
     def _stage_6_audit(self, session_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -214,11 +222,12 @@ if __name__ == "__main__":
     
     if result['final_status'] == "SUCCESS":
         booking = result['booking_result']
+        booking_data = booking.get('booking_data', {})
         print(f"\nFinal Booking:")
-        print(f"  Patient: {booking['patient_id']}")
-        print(f"  Provider: {booking['provider_id']}")
-        print(f"  Date/Time: {booking['date']} at {booking['time']}")
-        print(f"  Confirmation: {booking['confirmation_number']}")
+        print(f"  Patient: {booking_data.get('patient_id', 'N/A')}")
+        print(f"  Provider: {booking_data.get('provider_id', 'N/A')}")
+        print(f"  Date/Time: {booking_data.get('date', 'N/A')} at {booking_data.get('time', 'N/A')}")
+        print(f"  Confirmation: {booking.get('confirmation_number', 'N/A')}")
     
     print(f"\n✅ Workflow test complete!")
 

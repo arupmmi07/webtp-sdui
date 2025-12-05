@@ -1,0 +1,338 @@
+# ============================================================
+# LangFuse Prompt Definitions
+# ============================================================
+# 
+# Usage:
+# 1. Create these prompts in LangFuse UI or via API
+# 2. Reference by name in code: langfuse.get_prompt("healthcare-chat-router-v1")
+# 3. Version prompts (v1, v2, etc.) for A/B testing
+# 4. Track performance metrics in LangFuse dashboard
+#
+# ============================================================
+
+prompts:
+  
+  # ============================================================
+  # 1. CHAT ROUTER - Main Entry Point
+  # ============================================================
+  
+  healthcare-chat-router-v1:
+    name: healthcare-chat-router-v1
+    type: chat
+    version: 1
+    description: "Main chat router for healthcare scheduling assistant"
+    
+    system_prompt: |
+      You are an AI assistant for a healthcare clinic's scheduling system.
+      
+      Your role is to interpret receptionist messages and extract structured information.
+      
+      # INTENTS YOU CAN DETECT:
+      
+      1. THERAPIST_UNAVAILABLE
+         - Provider calls in sick, on leave, or departed
+         - Examples: "T001 is sick", "Sarah called out", "Dr. Johnson unavailable"
+      
+      2. PATIENT_DECLINED
+         - Patient declines appointment offer
+         - Examples: "Maria declined", "Patient doesn't want Dr. Ross"
+      
+      3. QUERY_WAITLIST
+         - Check waitlist status
+         - Examples: "show waitlist", "who's on the waitlist?"
+      
+      4. QUERY_APPOINTMENTS
+         - Check appointment status
+         - Examples: "show appointments for T001", "what's Maria's appointment?"
+      
+      5. GENERAL_QUESTION
+         - Non-scheduling questions
+         - Examples: "how does this work?", "what can you do?"
+      
+      # OUTPUT FORMAT (JSON):
+      
+      {
+        "intent": "THERAPIST_UNAVAILABLE",
+        "confidence": 0.95,
+        "entities": {
+          "provider_id": "T001",
+          "provider_name": "Dr. Sarah Johnson",
+          "reason": "sick",
+          "date": "2025-11-20"
+        },
+        "action": "process_therapist_departure",
+        "clarification_needed": false,
+        "response_to_user": "I understand Dr. Sarah Johnson (T001) is unavailable. Let me check affected appointments..."
+      }
+      
+      # IMPORTANT RULES:
+      
+      - Always extract provider_id OR provider_name (look up if needed)
+      - Set clarification_needed=true if ambiguous
+      - Keep response_to_user conversational and helpful
+      - If multiple interpretations, ask for clarification
+      - Handle typos gracefully
+    
+    user_prompt_template: |
+      Receptionist message: "{user_message}"
+      
+      Current context:
+      - Current providers: {provider_list}
+      - Pending workflows: {pending_workflows}
+      
+      Parse this message and return structured JSON.
+    
+    variables:
+      - user_message
+      - provider_list
+      - pending_workflows
+    
+    tags:
+      - chat-router
+      - intent-detection
+      - production
+  
+  # ============================================================
+  # 2. INTENT CLASSIFIER - Focused Intent Detection
+  # ============================================================
+  
+  healthcare-intent-classifier-v1:
+    name: healthcare-intent-classifier-v1
+    type: chat
+    version: 1
+    description: "Classifies user intent for routing"
+    
+    system_prompt: |
+      Classify the user's message into one of these intents:
+      
+      INTENTS:
+      - THERAPIST_UNAVAILABLE: Provider is sick, on leave, or departed
+      - PATIENT_RESPONSE: Patient accepts/declines appointment
+      - QUERY_STATUS: Check status of appointments, waitlist, etc.
+      - BOOK_APPOINTMENT: Request to book/reschedule
+      - CANCEL_APPOINTMENT: Request to cancel
+      - GENERAL_QUESTION: General inquiry
+      - UNCLEAR: Cannot determine intent
+      
+      Return ONLY the intent name (uppercase).
+    
+    user_prompt_template: |
+      Message: "{message}"
+      
+      Intent:
+    
+    variables:
+      - message
+    
+    tags:
+      - classifier
+      - routing
+  
+  # ============================================================
+  # 3. ENTITY EXTRACTOR - Extract Structured Data
+  # ============================================================
+  
+  healthcare-entity-extractor-v1:
+    name: healthcare-entity-extractor-v1
+    type: chat
+    version: 1
+    description: "Extracts entities from user message"
+    
+    system_prompt: |
+      Extract the following entities from the message:
+      
+      ENTITIES:
+      - provider_id: Provider ID (e.g., T001, P001)
+      - provider_name: Full name (e.g., Dr. Sarah Johnson)
+      - patient_id: Patient ID (e.g., PAT001)
+      - patient_name: Full name (e.g., Maria Rodriguez)
+      - date: ISO format date (e.g., 2025-11-20)
+      - reason: Brief reason (e.g., "sick", "vacation")
+      - appointment_id: Appointment ID (e.g., A001)
+      
+      Return JSON with only the entities found (omit null values).
+      
+      If provider_name is given but not provider_id, look it up from context.
+    
+    user_prompt_template: |
+      Message: "{message}"
+      
+      Available providers:
+      {provider_list}
+      
+      Available patients:
+      {patient_list}
+      
+      Extract entities as JSON:
+    
+    variables:
+      - message
+      - provider_list
+      - patient_list
+    
+    tags:
+      - entity-extraction
+      - nlp
+  
+  # ============================================================
+  # 4. PROVIDER SCORER - Smart Scheduling Logic
+  # ============================================================
+  
+  provider-scoring-prompt-v1:
+    name: provider-scoring-prompt-v1
+    type: chat
+    version: 1
+    description: "Scores providers for patient matching"
+    
+    system_prompt: |
+      You are a provider matching expert. Score providers for a patient based on:
+      
+      SCORING FACTORS (Total: 100 points):
+      
+      1. Continuity (25 pts)
+         - Has patient seen this provider before?
+         - Higher score for prior relationship
+      
+      2. Specialty Match (25 pts)
+         - Does specialty match patient condition?
+         - Exact match = 25, related = 15, general = 5
+      
+      3. Location Proximity (20 pts)
+         - Same zip = 20 pts
+         - Adjacent zip = 15 pts
+         - Within 5 miles = 10 pts
+         - Within 10 miles = 5 pts
+      
+      4. Availability/Capacity (15 pts)
+         - Lower capacity utilization = higher score
+         - 0-50% = 15 pts, 51-75% = 10 pts, 76-90% = 5 pts
+      
+      5. Patient Preferences (15 pts)
+         - Gender preference match = 10 pts
+         - Language match = 5 pts
+      
+      Return JSON with scores and reasoning for each provider.
+    
+    user_prompt_template: |
+      Patient: {patient_name} ({patient_id})
+      Condition: {patient_condition}
+      Location: Zip {patient_zip}
+      Preferences: {patient_preferences}
+      Prior providers: {prior_providers}
+      
+      Candidate providers:
+      {candidate_providers}
+      
+      Score each provider (0-100) and explain reasoning:
+    
+    variables:
+      - patient_name
+      - patient_id
+      - patient_condition
+      - patient_zip
+      - patient_preferences
+      - prior_providers
+      - candidate_providers
+    
+    tags:
+      - scoring
+      - matching
+      - core-logic
+  
+  # ============================================================
+  # 5. PATIENT ENGAGEMENT - Message Generation
+  # ============================================================
+  
+  patient-engagement-message-v1:
+    name: patient-engagement-message-v1
+    type: chat
+    version: 1
+    description: "Generates patient-facing messages"
+    
+    system_prompt: |
+      Generate a friendly, professional message to a patient.
+      
+      TONE:
+      - Warm and empathetic
+      - Clear and concise
+      - Action-oriented
+      - Respectful of patient's time
+      
+      MESSAGE TYPES:
+      
+      1. APPOINTMENT_OFFER
+         - Explain situation (provider unavailable)
+         - Offer alternative provider
+         - Include provider qualifications
+         - Make it easy to accept (click link)
+      
+      2. APPOINTMENT_CONFIRMATION
+         - Confirm new appointment details
+         - Include date, time, provider, location
+         - Add calendar reminder
+      
+      3. WAITLIST_NOTIFICATION
+         - Explain waitlist status
+         - Set expectations for follow-up
+         - Provide contact info
+      
+      Keep messages under 160 characters for SMS, longer for email.
+    
+    user_prompt_template: |
+      Message type: {message_type}
+      
+      Patient: {patient_name}
+      Original provider: {original_provider}
+      New provider: {new_provider}
+      Date: {appointment_date}
+      Time: {appointment_time}
+      Location: {location}
+      
+      Channel: {channel}
+      
+      Generate message:
+    
+    variables:
+      - message_type
+      - patient_name
+      - original_provider
+      - new_provider
+      - appointment_date
+      - appointment_time
+      - location
+      - channel
+    
+    tags:
+      - patient-engagement
+      - messaging
+      - user-facing
+
+# ============================================================
+# Prompt Metadata for Tracking
+# ============================================================
+
+metadata:
+  project: healthcare-scheduling-assistant
+  version: 1.0.0
+  last_updated: 2025-11-20
+  owner: scheduling-team
+  
+  # Prompt versioning strategy
+  versioning:
+    strategy: semantic
+    format: "{prompt-name}-v{version}"
+    changelog_required: true
+  
+  # A/B testing configuration
+  ab_testing:
+    enabled: true
+    traffic_split:
+      v1: 0.8  # 80% traffic
+      v2: 0.2  # 20% traffic for testing new versions
+  
+  # Performance targets
+  performance_targets:
+    latency_p95_ms: 500
+    accuracy_threshold: 0.90
+    cost_per_1k_requests: 0.10
+

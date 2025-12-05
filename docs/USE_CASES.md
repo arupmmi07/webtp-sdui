@@ -1,4 +1,7 @@
-#Use Case
+# Use Cases - Full Vision
+
+> **📌 Note:** This document describes the **full vision** with 15 appointments, 8 providers, and advanced features.  
+> **For the current demo**, see **[USE_CASES_SIMPLIFIED.md](USE_CASES_SIMPLIFIED.md)** which matches the actual data (3 appointments, 4 providers).
 
 This document provides detailed mapping of all 6 use cases.
 
@@ -187,13 +190,38 @@ Eliminated Providers:
 
 1. Read scoring weights from knowledge document:
    ```
-   Scoring Factors (Total: 150 points):
+   Scoring Factors (Total: 165 points):
    - Continuity Score: 40 points (has patient seen this provider before?)
    - Specialty Match: 35 points (exact specialty vs. general)
    - Patient Preference Fit: 30 points (gender, age, language, etc.)
    - Schedule Load Balance: 25 points (lower load = higher score)
-   - Day/Time Match: 20 points (matches patient's preferred day/time)
+   - Experience Match: 20 points (similar/better experience than original provider)
+   - Time Slot Priority: 15 points (earlier slot available, or +30 if same provider with earlier slot)
+   - Day/Time Match: 10 points (matches patient's preferred day/time)
    ```
+
+   **Detailed Scoring Criteria:**
+   
+   - **Continuity Score (40 pts):** Rewards providers who have treated the patient before. Helps maintain care continuity.
+   
+   - **Specialty Match (35 pts):** Ensures provider has the right clinical expertise for the patient's condition.
+   
+   - **Patient Preference Fit (30 pts):** Considers gender preference, clinic location, age similarity, language, etc.
+   
+   - **Schedule Load Balance (25 pts):** Prioritizes providers with lighter patient loads to ensure quality of care.
+   
+   - **Experience Match (20 pts):** NEW - Ensures new provider has similar or better experience level than original provider.
+     - Full points: Experience ≥ original provider
+     - Partial points: Experience slightly less but still qualified
+     - Zero points: Significantly less experienced
+   
+   - **Time Slot Priority (15 pts):** NEW - Rewards earlier appointment times to minimize patient wait.
+     - +30 pts: Same provider with earlier slot available
+     - +15 pts: Different provider with earlier slot
+     - Partial: Same day but later time
+     - Zero: Different day or much later time
+   
+   - **Day/Time Match (10 pts):** Matches patient's preferred appointment days (e.g., Tuesday/Thursday preference).
 
 2. Score each provider:
 
@@ -206,9 +234,11 @@ Eliminated Providers:
      - Same clinic location: +10 pts
      - Age similarity: +5 pts (both 50s)
    Schedule Load: 20/25 pts (15/25 patients = 60% capacity, well-balanced)
-   Day/Time Match: 20/20 pts (Tuesday 10 AM, Maria's preferred day/time)
+   Experience Match: 20/20 pts (10 years experience, similar to original provider Dr. Sarah - 12 years)
+   Time Slot Priority: 15/15 pts (Tuesday 10 AM available - same day as original appointment)
+   Day/Time Match: 10/10 pts (Tuesday is Maria's preferred day)
    
-   TOTAL: 105/150 pts
+   TOTAL: 130/165 pts
    Recommendation: EXCELLENT match despite no prior history
    ```
 
@@ -220,10 +250,12 @@ Eliminated Providers:
      - Gender match: 0 pts (male provider, Maria prefers female)
      - Same clinic: +5 pts
    Schedule Load: 8/25 pts (22/25 patients = 88% capacity, near max)
-   Day/Time Match: 0/20 pts (Thursday 3 PM only, Maria prefers Tuesday mornings)
+   Experience Match: 15/20 pts (8 years experience, slightly less than original provider)
+   Time Slot Priority: 0/15 pts (Thursday 3 PM - different day, later time)
+   Day/Time Match: 0/10 pts (Thursday is NOT Maria's preferred day)
    
-   TOTAL: 83/150 pts
-   Recommendation: GOOD continuity but poor preference match
+   TOTAL: 98/165 pts
+   Recommendation: GOOD continuity but poor preference match and time availability
    ```
 
    **Provider P006: Dr. Anna Park**
@@ -235,9 +267,11 @@ Eliminated Providers:
      - Different clinic location: 0 pts (10 miles away vs. 2 miles for others)
      - Younger age: +10 pts
    Schedule Load: 18/25 pts (18/25 patients = 72% capacity)
-   Day/Time Match: 10/20 pts (Tuesday 2 PM, right day but afternoon not preferred)
+   Experience Match: 18/20 pts (11 years experience, similar to original provider)
+   Time Slot Priority: 10/15 pts (Tuesday 2 PM - same day but later time than original 10 AM)
+   Day/Time Match: 10/10 pts (Tuesday is Maria's preferred day)
    
-   TOTAL: 85/150 pts
+   TOTAL: 113/165 pts
    Recommendation: GOOD alternative if Dr. Ross declines
    ```
 
@@ -248,30 +282,43 @@ Eliminated Providers:
 **Output:**
 ```
 Ranked Candidates for Maria Rodriguez (A001):
-1. Dr. Emily Ross (105 pts) - RECOMMENDED
-   Reasons: Perfect specialty match, gender preference met, ideal time slot, good availability
+1. Dr. Emily Ross (130/165 pts) - RECOMMENDED
+   Reasons: Perfect specialty match, gender preference met, ideal time slot, similar experience level
+   Key Factors: +35 specialty, +30 gender/location, +20 experience, +15 earlier slot
    
-2. Dr. Anna Park (85 pts) - GOOD ALTERNATIVE
-   Reasons: Female provider, well-qualified, slightly less convenient time
+2. Dr. Anna Park (113/165 pts) - GOOD ALTERNATIVE
+   Reasons: Female provider, well-qualified, same day availability, similar experience
+   Key Factors: +32 specialty, +25 gender, +18 experience, +10 same day (later time)
    
-3. Dr. Michael Lee (83 pts) - CONTINUITY OPTION
-   Reasons: Has treated patient before, but doesn't match preferences well
+3. Dr. Michael Lee (98/165 pts) - CONTINUITY OPTION
+   Reasons: Has treated patient before, but doesn't match preferences (gender, day, time)
+   Key Factors: +40 continuity, but 0 pts for time slot and preferred day
 
 Scoring Details Logged: Yes
 Explanation Available: Yes
 ```
 
 **Success Criteria:**
-- All 5 scoring factors applied
-- Scores calculated correctly
+- All 7 scoring factors applied (continuity, specialty, preference, load, experience, time slot, day/time)
+- Scores calculated correctly (out of 165 total points)
 - Providers ranked by total score
 - Human-readable reasons generated
-- At least 1 provider scores >70 points
+- At least 1 provider scores >100 points (60% threshold)
 
 **Knowledge Required:**
 - Scoring weights and formulas (knowledge doc)
 - Patient preference definitions (knowledge doc)
 - Continuity scoring rules (knowledge doc)
+- Experience level comparison criteria (knowledge doc)
+- Time slot priority rules (knowledge doc)
+- Preferred day/time matching logic (knowledge doc)
+
+**Fallback Rule (UC6):**
+- If no provider scores above the threshold (typically 100 points = 60% of max)
+- OR if all qualified providers decline the appointment
+- **Then:** Assign to Head of Department (HOD) for manual review
+- HOD receives low-score appointments with full scoring breakdown for informed decision-making
+- Marked with "needs_review" status for clear visibility
 
 ---
 

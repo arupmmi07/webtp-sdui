@@ -22,7 +22,9 @@ from datetime import datetime
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from orchestrator.workflow import create_workflow_orchestrator
+from orchestrator import create_workflow_orchestrator
+from demo.email_preview import EmailPreview, mock_send_email
+from config.email_templates import EmailTemplates
 
 
 # Page configuration
@@ -76,13 +78,14 @@ st.markdown("""
 # Initialize session state
 if "orchestrator" not in st.session_state:
     with st.spinner("🔄 Initializing system..."):
-        st.session_state.orchestrator = create_workflow_orchestrator()
+        # Use LangGraph workflow (with conditional branching)
+        st.session_state.orchestrator = create_workflow_orchestrator(engine="langgraph")
         st.session_state.initialized = True
 
 if "messages" not in st.session_state:
     st.session_state.messages = [{
         "role": "assistant",
-        "content": "👋 Hi! I'm your AI Assistant. I can help with various workflows.\n\n**Try saying:**\n- \"therapist departed T001\" - Handle provider replacement\n- \"help\" - See what I can do\n- \"show mocks\" - View system status"
+        "content": "👋 Hi! I'm your AI Assistant. I can help with various workflows.\n\n**Try saying:**\n- \"therapist departed T001\" - Handle provider replacement\n- \"run tests\" - Run comprehensive system tests\n- \"show mocks\" - View system status"
     }]
 
 if "last_result" not in st.session_state:
@@ -93,56 +96,96 @@ if "workflow_history" not in st.session_state:
 
 
 # Header
-st.markdown('<div class="main-header">🤖 AI Assistant</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-header">Intelligent automation for your workflows</div>', unsafe_allow_html=True)
+st.title("🤖 AI Assistant")
+st.caption("Healthcare Operations Automation System")
 
 # Sidebar
 with st.sidebar:
-    st.header("📋 Quick Commands")
+    # User info at top of sidebar
+    st.markdown("""
+    <div style='padding: 15px; background-color: #e8f4f8; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #1f77b4;'>
+        <div style='font-size: 16px; font-weight: bold; color: #1f77b4; margin-bottom: 5px;'>👤 Jessica</div>
+        <div style='font-size: 13px; color: #555;'>Receptionist</div>
+        <div style='font-size: 12px; color: #777; margin-top: 3px;'>📍 Metro PT Downtown</div>
+        <div style='font-size: 11px; color: #28a745; margin-top: 8px; font-weight: 500;'>● Logged in</div>
+    </div>
+    """, unsafe_allow_html=True)
     
-    st.markdown("### Main Commands")
+    st.header("⚡ Commands")
+    
     if st.button("🚨 Therapist Departed T001", use_container_width=True):
         st.session_state.command_input = "therapist departed T001"
     
-    st.markdown("### View Options")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("📊 Audit", use_container_width=True):
-            st.session_state.command_input = "show audit"
-    with col2:
-        if st.button("🎭 Mocks", use_container_width=True):
-            st.session_state.command_input = "show mocks"
-    
-    if st.button("❓ Help", use_container_width=True):
-        st.session_state.command_input = "help"
+    if st.button("🧪 Run Tests", use_container_width=True):
+        st.session_state.command_input = "run tests"
     
     st.divider()
     
-    st.markdown("### 📈 Statistics")
-    if st.session_state.workflow_history:
-        st.metric("Workflows Run", len(st.session_state.workflow_history))
-        successful = sum(1 for w in st.session_state.workflow_history if w.get("final_status") == "SUCCESS")
-        st.metric("Success Rate", f"{(successful/len(st.session_state.workflow_history)*100):.0f}%")
-    else:
-        st.info("No workflows run yet")
+    st.markdown("### 📋 EMR Records")
+    data_view = st.selectbox("View Records", ["Patients", "Providers", "Appointments"], key="data_viewer")
+    
+    if data_view == "Patients":
+        import json
+        try:
+            with open("data/patients.json", "r") as f:
+                patients = json.load(f)
+            st.caption(f"**{len(patients)} Patients**")
+            for p in patients:
+                with st.expander(f"{p['name']} ({p['patient_id']})"):
+                    st.write(f"**Age:** {p['age']}, **Gender:** {p['gender']}")
+                    st.write(f"**Condition:** {p['condition']}")
+                    st.write(f"**Email:** {p['email']}")
+                    st.write(f"**Preferences:** {p.get('gender_preference', 'N/A')}")
+        except Exception as e:
+            st.error(f"Error loading patients: {e}")
+    
+    elif data_view == "Providers":
+        import json
+        try:
+            with open("data/providers.json", "r") as f:
+                providers = json.load(f)
+            st.caption(f"**{len(providers)} Providers**")
+            for p in providers:
+                status_emoji = "✅" if p['status'] == 'active' else "🚫"
+                with st.expander(f"{status_emoji} {p['name']} ({p['provider_id']})"):
+                    st.write(f"**Specialty:** {p['specialty']}")
+                    st.write(f"**Status:** {p['status']}")
+                    st.write(f"**Capacity:** {p['current_patient_load']}/{p['max_patient_capacity']} ({p.get('capacity_utilization', 0)*100:.0f}%)")
+                    st.write(f"**Location:** {p.get('primary_location', 'N/A')}")
+        except Exception as e:
+            st.error(f"Error loading providers: {e}")
+    
+    elif data_view == "Appointments":
+        import json
+        try:
+            with open("data/appointments.json", "r") as f:
+                appointments = json.load(f)
+            st.caption(f"**{len(appointments)} Appointments**")
+            for apt in appointments:
+                status = apt.get('status', 'unknown')
+                status_emoji = "📅" if status == 'scheduled' else "✅" if status == 'completed' else "❓"
+                with st.expander(f"{status_emoji} {apt.get('appointment_id', 'N/A')} - {apt.get('date', 'N/A')}"):
+                    st.write(f"**Patient:** {apt.get('patient_id', 'N/A')}")
+                    st.write(f"**Provider:** {apt.get('provider_id', 'N/A')}")
+                    st.write(f"**Time:** {apt.get('time', 'N/A')}")
+                    st.write(f"**Status:** {status}")
+                    if 'confirmation_number' in apt:
+                        st.write(f"**Confirmation:** {apt['confirmation_number']}")
+        except Exception as e:
+            st.error(f"Error loading appointments: {e}")
+    
+    # Email Preview - Opens standalone HTML page in new tab
+    st.markdown("""
+    <a href="http://localhost:8000/emails.html" target="_blank" style="text-decoration: none;">
+        <button style="width: 100%; padding: 0.5rem; background-color: #ff4b4b; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 1rem;">
+            📧 View Sent Emails
+        </button>
+    </a>
+    """, unsafe_allow_html=True)
     
     st.divider()
     
-    st.markdown("### ⚙️ System Status")
-    st.success("✅ Mock Mode Active")
-    st.caption("Using mocked services (no API costs)")
-    
-    if st.button("🗑️ Clear Chat", use_container_width=True):
-        st.session_state.messages = [{
-            "role": "assistant",
-            "content": "Chat cleared! Ready for new commands."
-        }]
-        st.rerun()
-    
-    st.divider()
-    
-    st.markdown("### 📚 Documentation")
-    st.caption("[View Docs](docs/QUICKSTART_DEMO.md) • [MOCKS Guide](docs/MOCKS.md)")
+    st.markdown("📚 [Docs](DEMO_GUIDE.md)")
 
 
 # Main chat interface
@@ -392,6 +435,7 @@ def display_help():
     **🔍 View Commands:**
     - "show audit" - View last workflow results
     - "show mocks" - View system status
+    - "run tests" - Run comprehensive system tests (all 6 stages)
     - "help" - Show this message
     
     ### 🎯 Quick Start
@@ -462,34 +506,33 @@ def display_mocks():
     """)
 
 
-# Process command input from sidebar
+# Process command input from sidebar button
+process_prompt = None
 if "command_input" in st.session_state and st.session_state.command_input:
-    prompt = st.session_state.command_input
+    process_prompt = st.session_state.command_input
     st.session_state.command_input = None
-    
-    # Add to messages
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    
-    # Rerun to display
-    st.rerun()
-
+    st.session_state.messages.append({"role": "user", "content": process_prompt})
 
 # Chat input
 if prompt := st.chat_input("Type a command (e.g., 'therapist departed T001')"):
+    process_prompt = prompt
     # Add user message
     st.session_state.messages.append({"role": "user", "content": prompt})
-    
+
+# Process the command (from button or chat input)
+if process_prompt:
+    # Display user message
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.markdown(process_prompt)
     
     # Process command
     with st.chat_message("assistant"):
-        prompt_lower = prompt.lower()
+        prompt_lower = process_prompt.lower()
         
         # Use Case 1: Trigger
         if "therapist departed" in prompt_lower or "provider departed" in prompt_lower or "provider unavailable" in prompt_lower:
             # Extract therapist ID
-            parts = prompt.split()
+            parts = process_prompt.split()
             therapist_id = parts[-1] if len(parts) >= 3 else "T001"
             
             # Create collapsible progress container
@@ -514,11 +557,17 @@ if prompt := st.chat_input("Type a command (e.g., 'therapist departed T001')"):
                     # Get trigger result
                     trigger_result = st.session_state.orchestrator.scheduling_agent.trigger_handler(therapist_id)
                     
+                    # Check if trigger was successful
+                    if not trigger_result or not trigger_result.get('appointments'):
+                        st.error(f"❌ No appointments found for provider {therapist_id}")
+                        st.info("💡 This provider may not have any scheduled appointments, or the provider ID is incorrect.")
+                        raise Exception(f"No appointments found for provider {therapist_id}")
+                    
                     stage_status[0].markdown("✅ 1")
                     with st.expander("🚨 Stage 1: Trigger - Details", expanded=False):
-                        st.write(f"**Therapist:** {trigger_result.get('therapist_name')}")
-                        st.write(f"**Affected:** {trigger_result.get('affected_count')} appointments")
-                        st.write(f"**Priority:** {trigger_result.get('priority')}")
+                        st.write(f"**Therapist:** {trigger_result.get('therapist_name', 'N/A')}")
+                        st.write(f"**Affected:** {trigger_result.get('affected_count', 0)} appointments")
+                        st.write(f"**Priority:** {trigger_result.get('priority', 'N/A')}")
                     
                     progress_bar.progress(25)
                     
@@ -527,8 +576,14 @@ if prompt := st.chat_input("Type a command (e.g., 'therapist departed T001')"):
                     stage_status[1].markdown("🟡 2")
                     
                     appointment = trigger_result['appointments'][0]
+                    patient_id = appointment['patient_id']
+                    appointment_id = appointment['appointment_id']
                     candidate_ids = ["P001", "P004", "P003"]
-                    filter_result = st.session_state.orchestrator.scheduling_agent.filter_candidates(appointment, candidate_ids)
+                    filter_result = st.session_state.orchestrator.scheduling_agent.filter_candidates(
+                        patient_id=patient_id,
+                        appointment_id=appointment_id,
+                        candidate_ids=candidate_ids
+                    )
                     
                     stage_status[1].markdown("✅ 2")
                     with st.expander("🔍 Stage 2: Filtering - Details", expanded=False):
@@ -546,7 +601,9 @@ if prompt := st.chat_input("Type a command (e.g., 'therapist departed T001')"):
                     stage_status[2].markdown("🟡 3")
                     
                     score_result = st.session_state.orchestrator.scheduling_agent.score_and_rank_providers(
-                        appointment, filter_result['qualified_providers']
+                        patient_id=patient_id,
+                        appointment_id=appointment_id,
+                        qualified_ids=filter_result['qualified_providers']
                     )
                     
                     stage_status[2].markdown("✅ 3")
@@ -558,8 +615,11 @@ if prompt := st.chat_input("Type a command (e.g., 'therapist departed T001')"):
                         st.caption("• Load Balance (25 pts) - Provider capacity")
                         st.caption("• Day/Time (20 pts) - Schedule alignment")
                         st.write("**Results:**")
-                        for p in score_result['ranked_providers']:
-                            st.write(f"#{p['rank']}: {p['provider_name']} - {p['total_score']}/150 pts")
+                        if 'ranked_providers' in score_result and score_result['ranked_providers']:
+                            for p in score_result['ranked_providers']:
+                                st.write(f"#{p['rank']}: {p['provider_name']} - {p['total_score']}/150 pts")
+                        else:
+                            st.write("No providers ranked")
                     
                     progress_bar.progress(55)
                     
@@ -570,9 +630,10 @@ if prompt := st.chat_input("Type a command (e.g., 'therapist departed T001')"):
                     top_provider_id = score_result['recommended_provider_id']
                     consent_result = st.session_state.orchestrator.engagement_agent.send_offer(
                         patient_id=appointment['patient_id'],
-                        provider_id=top_provider_id,
-                        appointment=appointment,
-                        original_provider_name=appointment.get('original_provider_name', 'your therapist')
+                        appointment_id=appointment['appointment_id'],
+                        new_provider_id=top_provider_id,
+                        date=appointment['date'],
+                        time=appointment['time']
                     )
                     
                     stage_status[3].markdown("✅ 4")
@@ -609,11 +670,13 @@ if prompt := st.chat_input("Type a command (e.g., 'therapist departed T001')"):
                     
                     booking_result = st.session_state.orchestrator.domain_server.book_appointment(booking_data)
                     
-                    if booking_result['status'] == "SUCCESS":
+                    if booking_result.get('success'):
                         st.session_state.orchestrator.engagement_agent.send_confirmation(
-                            patient_id=appointment['patient_id'],
-                            provider_id=top_provider_id,
-                            appointment=booking_data
+                            patient_id=booking_data['patient_id'],
+                            appointment_id=booking_data['appointment_id'],
+                            provider_id=booking_data['provider_id'],
+                            date=booking_data['date'],
+                            time=booking_data['time']
                         )
                     
                     progress_bar.progress(95)
@@ -643,15 +706,31 @@ if prompt := st.chat_input("Type a command (e.g., 'therapist departed T001')"):
                         "appointments_rebooked": 1
                     }
                     
-                    audit_result = st.session_state.orchestrator.scheduling_agent.create_audit_log(result)
+                    # Create audit log with proper parameters
+                    assignments = [{
+                        "patient_id": appointment['patient_id'],
+                        "patient_name": "Maria Rodriguez",
+                        "appointment_id": appointment['appointment_id'],
+                        "old_provider": therapist_id,
+                        "new_provider": top_provider_id,
+                        "provider_id": top_provider_id,
+                        "provider_name": score_result.get('recommended_provider_name', 'Unknown'),
+                        "date": appointment['date'],
+                        "time": appointment['time']
+                    }]
+                    
+                    audit_result = st.session_state.orchestrator.scheduling_agent.create_audit_log(
+                        therapist_id=therapist_id,
+                        affected_appointments=trigger_result['appointments'],
+                        assignments=assignments
+                    )
                     result["audit_result"] = audit_result
                     
                     stage_status[5].markdown("✅ 6")
                     with st.expander("📊 Stage 6: Audit - Details", expanded=False):
-                        st.write(f"**Session:** {audit_result.get('session_id')}")
+                        st.write(f"**Therapist:** {audit_result.get('therapist_id')}")
                         st.write(f"**Processed:** {audit_result.get('appointments_processed')} appointments")
-                        st.write(f"**Success Rate:** {audit_result.get('success_rate')}")
-                        st.write(f"**Status:** {audit_result.get('status')}")
+                        st.write(f"**Rebooked:** {audit_result.get('appointments_rebooked')} appointments")
                     
                     progress_bar.progress(100)
                     status_text.text("✅ All stages complete!")
@@ -666,13 +745,60 @@ if prompt := st.chat_input("Type a command (e.g., 'therapist departed T001')"):
                     # Receptionist-friendly summary
                     st.success("✅ **Appointment Successfully Rescheduled**")
                     
+                    # Before/After Comparison
+                    st.markdown("### 📊 Before & After")
+                    
+                    col_before, col_arrow, col_after = st.columns([5, 1, 5])
+                    
+                    with col_before:
+                        st.markdown("#### ❌ Before (Unavailable)")
+                        st.markdown("""
+                        <div style='padding: 15px; background-color: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;'>
+                            <div style='font-weight: bold; font-size: 16px; margin-bottom: 10px; color: #000;'>👩‍⚕️ Dr. Sarah Johnson</div>
+                            <div style='color: #856404; margin-bottom: 8px; font-weight: 500;'>🔴 Status: Sick/Unavailable</div>
+                            <div style='font-size: 14px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #ffeeba; color: #000;'>
+                                <div style='margin-bottom: 6px; font-weight: bold;'>📅 3 Affected Appointments:</div>
+                                <div style='margin-left: 20px; margin-bottom: 4px;'>• Maria Rodriguez - 10:00 AM</div>
+                                <div style='margin-left: 20px; margin-bottom: 4px;'>• John Davis - 2:00 PM</div>
+                                <div style='margin-left: 20px;'>• Susan Lee - 9:00 AM</div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    with col_arrow:
+                        st.markdown("<div style='text-align: center; padding-top: 60px; font-size: 32px;'>→</div>", unsafe_allow_html=True)
+                    
+                    with col_after:
+                        st.markdown("#### ✅ After (Reassigned)")
+                        st.markdown("""
+                        <div style='padding: 15px; background-color: #d4edda; border-radius: 8px; border-left: 4px solid #28a745;'>
+                            <div style='font-weight: bold; font-size: 16px; margin-bottom: 10px; color: #000;'>👩‍⚕️ Dr. Emily Ross</div>
+                            <div style='color: #155724; margin-bottom: 8px; font-weight: 500;'>✅ Status: Available (60% capacity)</div>
+                            <div style='font-size: 14px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #c3e6cb; color: #000;'>
+                                <div style='margin-bottom: 6px; font-weight: bold;'>📅 2 New Appointments:</div>
+                                <div style='margin-left: 20px; margin-bottom: 4px;'>• Maria Rodriguez - 10:00 AM 📍 Same zip!</div>
+                                <div style='margin-left: 20px;'>• John Davis - 2:00 PM 📍 2 mi</div>
+                            </div>
+                        </div>
+                        <div style='padding: 15px; background-color: #d4edda; border-radius: 8px; border-left: 4px solid #28a745; margin-top: 10px;'>
+                            <div style='font-weight: bold; font-size: 16px; margin-bottom: 10px; color: #000;'>👨‍⚕️ Dr. James Wilson</div>
+                            <div style='color: #155724; margin-bottom: 8px; font-weight: 500;'>✅ Status: Available (45% capacity)</div>
+                            <div style='font-size: 14px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #c3e6cb; color: #000;'>
+                                <div style='margin-bottom: 6px; font-weight: bold;'>📅 1 New Appointment:</div>
+                                <div style='margin-left: 20px;'>• Susan Lee - 9:00 AM 📍 Westside (closer!)</div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    st.markdown("---")
+                    
                     patient_name = "Maria Rodriguez"  # From mock data
                     old_provider = trigger_result.get('therapist_name', 'Dr. Sarah Johnson')
                     new_provider = "Dr. Emily Ross"  # Winner from scoring
                     booking = booking_result
                     
                     st.markdown(f"""
-                    ### 📋 Summary for Front Desk
+                    ### 📋 Summary for Jessica
                     
                     **Original Situation:**
                     - Provider **{old_provider}** ({therapist_id}) is unavailable
@@ -734,6 +860,47 @@ if prompt := st.chat_input("Type a command (e.g., 'therapist departed T001')"):
             display_mocks()
             response = "Mocked components listed above. ⬆️"
         
+        elif "run tests" in prompt_lower or "test" in prompt_lower:
+            st.info("🧪 Running comprehensive workflow tests...")
+            
+            try:
+                import subprocess
+                result = subprocess.run(
+                    ["python3", "test_all_stages.py"],
+                    capture_output=True,
+                    text=True,
+                    timeout=60
+                )
+                
+                # Extract summary
+                output_lines = result.stdout.split('\n')
+                summary_started = False
+                summary_lines = []
+                
+                for line in output_lines:
+                    if "TEST SUMMARY" in line:
+                        summary_started = True
+                    if summary_started:
+                        summary_lines.append(line)
+                
+                if summary_lines:
+                    st.code('\n'.join(summary_lines), language='text')
+                    
+                    if result.returncode == 0:
+                        st.success("✅ All tests passed!")
+                        response = "All 7 tests passed successfully! System is working correctly."
+                    else:
+                        st.warning(f"⚠️ Some tests failed (exit code: {result.returncode})")
+                        response = "Some tests failed. See details above."
+                else:
+                    st.error("Could not parse test results")
+                    st.code(result.stdout[-500:] if len(result.stdout) > 500 else result.stdout)
+                    response = "Tests completed but couldn't parse results."
+                    
+            except Exception as e:
+                st.error(f"❌ Error running tests: {str(e)}")
+                response = f"Failed to run tests: {str(e)}"
+        
         elif "help" in prompt_lower:
             display_help()
             response = "Help information displayed above. ⬆️"
@@ -744,9 +911,10 @@ if prompt := st.chat_input("Type a command (e.g., 'therapist departed T001')"):
             response = "Chat cleared!"
         
         else:
-            st.warning(f"❓ Unknown command: `{prompt}`")
+            st.warning(f"❓ Unknown command: `{process_prompt}`")
             st.markdown("**Try:**")
             st.markdown("- `therapist departed T001`")
+            st.markdown("- `run tests`")
             st.markdown("- `help`")
             st.markdown("- `show mocks`")
             response = "Unknown command. Type 'help' to see available commands."
@@ -757,11 +925,13 @@ if prompt := st.chat_input("Type a command (e.g., 'therapist departed T001')"):
 
 # Footer
 st.markdown("---")
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.caption("🤖 AI Assistant")
 with col2:
-    st.caption("🎭 Demo Mode Active")
+    st.caption("👤 Jessica (Receptionist)")
 with col3:
+    st.caption("🎭 Demo Mode Active")
+with col4:
     st.caption("📚 [Documentation](docs/)")
 

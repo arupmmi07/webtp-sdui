@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Development
+.env
+*.log
+test_*.py
+thrash/
+
+# Data (will be mounted as volumes)
+# Uncomment if you don't want to include data in image
+# data/
+# knowledge/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+

@@ -1,0 +1,50 @@
+[
+  {
+    "slot_id": "SLOT001",
+    "provider_id": "P001",
+    "date": "2025-11-20",
+    "time": "10:00 AM",
+    "duration_minutes": 60,
+    "specialty": "Physical Therapy",
+    "location": "Downtown",
+    "reason_freed": "Patient cancelled",
+    "freed_at": "2025-11-18T16:30:00Z",
+    "status": "available",
+    "backfilled_with": null,
+    "backfilled_at": null
+  },
+  {
+    "provider_id": "P001",
+    "date": "2025-11-20",
+    "time": "10:00 AM",
+    "duration_minutes": 60,
+    "specialty": "Physical Therapy",
+    "location": "Downtown",
+    "reason_freed": "Patient declined all providers",
+    "freed_at": "2025-11-20T21:24:36.739786Z",
+    "slot_id": "SLOT002",
+    "status": "backfilled",
+    "backfilled_with": {
+      "patient_id": "PAT004",
+      "appointment_id": "A676"
+    },
+    "backfilled_at": "2025-11-20T21:24:36.740750Z"
+  },
+  {
+    "provider_id": "T001",
+    "date": "2025-11-20",
+    "time": "10:00 AM",
+    "duration_minutes": 60,
+    "specialty": "Physical Therapy",
+    "location": "Downtown",
+    "reason_freed": "Patient declined all providers",
+    "freed_at": "2025-11-20T21:26:12.475846Z",
+    "slot_id": "SLOT003",
+    "status": "backfilled",
+    "backfilled_with": {
+      "patient_id": "PAT006",
+      "appointment_id": "A772"
+    },
+    "backfilled_at": "2025-11-20T21:26:12.476923Z"
+  }
+]

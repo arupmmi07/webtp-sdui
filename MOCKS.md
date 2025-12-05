@@ -11,14 +11,15 @@
 
 | Component | Status | Mock Implementation | Real Implementation | Swap Priority | Estimated Effort |
 |-----------|--------|-------------------|-------------------|---------------|------------------|
-| **LLM Calls** | 🟡 MOCKED | `adapters/llm/mock_llm.py` | `adapters/llm/litellm_adapter.py` | HIGH | 2 hours |
+| **LLM Calls** | 🟡 MOCKED | `adapters/llm/mock_llm.py` | LiteLLM via Docker | HIGH | 5 min (set .env) |
 | **LangFuse Prompts** | 🟡 MOCKED | Hardcoded in mock_llm.py | Pull from LangFuse API | HIGH | 2 hours |
-| **Knowledge Files** | 🟡 MOCKED | .txt files with rules | .pdf files | MEDIUM | 1 hour |
-| **MCP Knowledge Server** | 🟡 MOCKED | Returns hardcoded rules | Parse PDFs dynamically | MEDIUM | 4 hours |
-| **MCP Domain Server** | 🟡 MOCKED | Returns hardcoded data | Connect to DB/API | LOW | 8 hours |
+| **Knowledge Server** | 🟢 REAL | File-based (.txt/.md) | File-based (.txt/.md) | N/A | ✅ Done |
+| **Knowledge Files** | 🟡 MOCKED | .txt files with rules | .pdf files | MEDIUM | 4 hours |
+| **MCP Domain Server** | 🟢 REAL | JSON files | Connect to WebPT API | MEDIUM | 1 week |
 | **SMS/Email** | 🟡 MOCKED | Print to console | Twilio/SendGrid | LOW | 4 hours |
-| **Event Queue** | 🟢 REAL | Python Queue | Python Queue | N/A | Done |
-| **Workflow** | 🟢 REAL | LangGraph | LangGraph | N/A | Done |
+| **Event Queue** | 🟢 REAL | Python Queue | Python Queue | N/A | ✅ Done |
+| **Workflow** | 🟢 REAL | LangGraph | LangGraph | N/A | ✅ Done |
+| **Docker + LiteLLM** | 🟢 REAL | Docker Compose | Docker Compose | N/A | ✅ Done |
 
 ---
 
@@ -50,14 +51,22 @@ from adapters.llm.litellm_adapter import LiteLLMAdapter
 llm = LiteLLMAdapter(model="claude-sonnet-4")
 ```
 
-**Testing:**
-```bash
-# Run with mocks (no API calls)
-python demo/cli.py
+**How to swap (EASY - Use Docker):**
 
-# Run with real LLM (requires API keys)
-python demo/cli.py --real-llm
+```bash
+# Step 1: Setup environment
+bash scripts/setup-env.sh
+
+# Step 2: Edit .env
+nano .env
+# Set: ANTHROPIC_API_KEY=sk-ant-api03-YOUR_KEY
+# Set: USE_MOCK_LLM=false
+
+# Step 3: Start
+make docker-up
 ```
+
+**Effort:** 5 minutes | **Cost:** ~$0.03/workflow | **Guide:** `DOCKER_SETUP.md`
 
 ---
 
