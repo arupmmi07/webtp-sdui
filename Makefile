@@ -150,11 +150,10 @@ dev: ## Start API and UI (both services in background)
 		echo "❌ Virtual environment not found. Run 'make install' first."; \
 		exit 1; \
 	fi
-	@echo "🔄 Resetting demo data to initial state..."
-	@./scripts/reset-demo.sh
-	@echo ""
 	@mkdir -p logs
 	@./scripts/start.sh
+	@echo ""
+	@echo "💡 To reset demo data, use: curl -X POST http://localhost:8000/api/demo/reset -H 'Content-Type: application/json' -d '{}'"
 
 cli: ## Run the interactive CLI demo
 	@echo "Starting interactive CLI..."
