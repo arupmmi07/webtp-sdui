@@ -1017,6 +1017,154 @@ async def get_emails():
 
 
 # ============================================================
+# Demo Reset Endpoint
+# ============================================================
+
+class DemoResetRequest(BaseModel):
+    start_date: Optional[str] = None  # YYYY-MM-DD, defaults to today
+    days_ahead: int = 7  # Number of days to create appointments for
+    providers: Optional[List[str]] = None  # List of provider IDs, defaults to all
+
+@app.post(
+    "/api/demo/reset",
+    tags=["Demo"],
+    summary="Reset Demo Data",
+    description="Reset appointments for demo - creates fresh appointments for date range (weekdays only, future times only)"
+)
+async def reset_demo(request: DemoResetRequest):
+    """
+    Reset demo data by recreating appointments for specified date range.
+    
+    - Creates appointments only on weekdays (Mon-Fri)
+    - Skips times that have already passed today
+    - Distributes patients across providers
+    - Clears emails and waitlist
+    """
+    try:
+        from datetime import datetime, timedelta
+        import random
+        
+        # Parse start date or use today
+        if request.start_date:
+            start_date = datetime.strptime(request.start_date, "%Y-%m-%d")
+        else:
+            start_date = datetime.now()
+        
+        # Load data files
+        providers_file = DATA_DIR / "providers.json"
+        patients_file = DATA_DIR / "patients.json"
+        appointments_file = DATA_DIR / "appointments.json"
+        emails_file = DATA_DIR / "emails.json"
+        waitlist_file = DATA_DIR / "waitlist.json"
+        freed_slots_file = DATA_DIR / "freed_slots.json"
+        
+        with open(providers_file, 'r') as f:
+            providers = json.load(f)
+        with open(patients_file, 'r') as f:
+            patients = json.load(f)
+        
+        # Filter providers if specified
+        if request.providers:
+            providers = [p for p in providers if p['provider_id'] in request.providers]
+        
+        # Time slots (30-minute intervals)
+        time_slots = [
+            "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+            "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"
+        ]
+        
+        # Generate appointments
+        appointments = []
+        appointment_counter = 1
+        patient_index = 0
+        current_time = datetime.now()
+        
+        for day_offset in range(request.days_ahead):
+            current_date = start_date + timedelta(days=day_offset)
+            
+            # Skip weekends (Saturday=5, Sunday=6)
+            if current_date.weekday() >= 5:
+                continue
+            
+            # For each provider
+            for provider in providers:
+                # Skip if provider not available on this day
+                day_name = current_date.strftime("%A")
+                if day_name not in provider.get('available_days', []):
+                    continue
+                
+                # For each time slot
+                for time_slot in time_slots:
+                    # Skip past times if it's today
+                    if current_date.date() == current_time.date():
+                        slot_time = datetime.strptime(time_slot, "%H:%M").time()
+                        if slot_time <= current_time.time():
+                            continue
+                    
+                    # Assign patient (cycle through patients)
+                    if patient_index >= len(patients):
+                        patient_index = 0  # Wrap around
+                    
+                    patient = patients[patient_index]
+                    patient_index += 1
+                    
+                    # Create appointment
+                    appointment = {
+                        "appointment_id": f"A{appointment_counter:03d}",
+                        "patient_id": patient['patient_id'],
+                        "provider_id": provider['provider_id'],
+                        "date": current_date.strftime("%Y-%m-%dT") + time_slot + ":00",
+                        "time": time_slot,
+                        "status": "scheduled",
+                        "confirmation_number": f"CONF-{appointment_counter:03d}",
+                        "reassigned": False,
+                        "confirmation_status": "confirmed"
+                    }
+                    appointments.append(appointment)
+                    appointment_counter += 1
+        
+        # Save appointments
+        with open(appointments_file, 'w') as f:
+            json.dump(appointments, f, indent=2)
+        
+        # Clear emails
+        with open(emails_file, 'w') as f:
+            json.dump([], f, indent=2)
+        
+        # Clear waitlist
+        with open(waitlist_file, 'w') as f:
+            json.dump([], f, indent=2)
+        
+        # Clear freed slots
+        with open(freed_slots_file, 'w') as f:
+            json.dump([], f, indent=2)
+        
+        # Reset provider unavailable dates
+        for provider in providers:
+            provider['unavailable_dates'] = []
+            provider['status'] = 'active'
+        with open(providers_file, 'w') as f:
+            json.dump(providers, f, indent=2)
+        
+        return {
+            "success": True,
+            "message": "Demo data reset successfully",
+            "appointments_created": len(appointments),
+            "date_range": {
+                "start": start_date.strftime("%Y-%m-%d"),
+                "end": (start_date + timedelta(days=request.days_ahead - 1)).strftime("%Y-%m-%d")
+            },
+            "providers_included": len(providers),
+            "patients_used": min(len(patients), patient_index)
+        }
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to reset demo: {str(e)}")
+
+
+# ============================================================
 # Run Server
 # ============================================================
 

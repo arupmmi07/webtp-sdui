@@ -161,9 +161,10 @@ class PatientEngagementAgent:
         contact_info = patient.get("email") if channel == "email" else patient.get("phone")
         
         # Generate confirmation links
+        from config.app_config import get_email_accept_url, get_email_decline_url
         token = f"{appointment_id}_{patient_id}_{new_provider_id}"
-        accept_url = f"http://localhost:8000/api/patient-response?token={token}&response=accept"
-        decline_url = f"http://localhost:8000/api/patient-response?token={token}&response=decline"
+        accept_url = get_email_accept_url(token)
+        decline_url = get_email_decline_url(token)
         
         # Send email(s) - AI for first 2, then template only
         print(f"[{channel.upper()} MOCK] Sending to {contact_info}")

@@ -8,6 +8,7 @@ services:
       - "8000:8000"
       - "8501:8501"
     environment:
+      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:8000}
       - AZURE_API_KEY=${AZURE_API_KEY}
       - AZURE_API_BASE=${AZURE_API_BASE}
       - AZURE_API_VERSION=${AZURE_API_VERSION:-2024-02-15-preview}
@@ -15,6 +16,7 @@ services:
       - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
       - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
       - LANGFUSE_HOST=${LANGFUSE_HOST:-https://cloud.langfuse.com}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
     volumes:
       - ../data:/app/data
     restart: unless-stopped
