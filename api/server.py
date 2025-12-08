@@ -1173,7 +1173,8 @@ async def reset_demo(request: DemoResetRequest):
                 "end": (start_date + timedelta(days=request.days_ahead - 1)).strftime("%Y-%m-%d")
             },
             "providers_included": len(providers),
-            "patients_used": min(len(patients), patient_index)
+            "patients_used": len(realistic_patients),
+            "appointments_per_day": request.appointments_per_day
         }
         
     except Exception as e:
