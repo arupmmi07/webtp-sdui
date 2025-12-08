@@ -98,7 +98,27 @@
       "preferred_provider_gender": "male",
       "preferred_time": "evening",
       "match_type": "waitlist",
-      "notes": "WAITLIST CASE - Complex needs, limited availability, specific requirements not met by current providers"
+      "notes": "WAITLIST CASE - Complex needs requiring multiple specialties not available"
+    },
+    {
+      "patient_id": "PAT011",
+      "patient_name": "Patricia Williams",
+      "condition": "vestibular rehabilitation",
+      "specialty_needed": "Vestibular Therapy",
+      "preferred_provider_gender": "female",
+      "preferred_time": "morning",
+      "match_type": "waitlist",
+      "notes": "WAITLIST CASE - Requires specialized vestibular therapy not offered by current providers"
+    },
+    {
+      "patient_id": "PAT012",
+      "patient_name": "Thomas Brown",
+      "condition": "pediatric physical therapy",
+      "specialty_needed": "Pediatric Physical Therapy",
+      "preferred_provider_gender": "any",
+      "preferred_time": "afternoon",
+      "match_type": "waitlist",
+      "notes": "WAITLIST CASE - Requires pediatric specialist, none available in current provider pool"
     }
   ],
   "provider_specialty_mapping": {
