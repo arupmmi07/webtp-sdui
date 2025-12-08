@@ -312,9 +312,15 @@
     </div>
     
     <script>
+        // Get base URL dynamically
+        const getBaseUrl = () => {
+            return `${window.location.protocol}//${window.location.host}`;
+        };
+
         async function loadEmails() {
             try {
-                const response = await fetch('http://localhost:8000/api/emails');
+                const baseUrl = getBaseUrl();
+                const response = await fetch(`${baseUrl}/api/emails`);
                 const emails = await response.json();
                 
                 displayEmails(emails);

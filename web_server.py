@@ -89,7 +89,7 @@ class Patient(BaseModel):
     phone: Optional[str] = None
     condition: Optional[str] = None
     preferred_provider_gender: Optional[str] = None
-    preferred_days: Optional[List[str]] = []
+    preferred_days: Optional[Any] = None  # Can be string or list
     max_distance_miles: Optional[float] = None
 
 class DemoResetRequest(BaseModel):
@@ -125,7 +125,7 @@ async def health_check():
     """Health check endpoint."""
     return {"status": "healthy", "message": "WebTP Demo is running"}
 
-@app.get("/api/appointments", response_model=List[Appointment])
+@app.get("/api/appointments")
 async def get_appointments(
     provider_id: Optional[str] = Query(None, description="Filter by provider ID")
 ):
@@ -145,7 +145,7 @@ async def get_appointments(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading appointments: {str(e)}")
 
-@app.get("/api/providers", response_model=List[Provider])
+@app.get("/api/providers")
 async def get_providers():
     """Get all healthcare providers."""
     try:
@@ -165,7 +165,7 @@ async def get_providers():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading providers: {str(e)}")
 
-@app.get("/api/patients", response_model=List[Patient])
+@app.get("/api/patients")
 async def get_patients():
     """Get all patients."""
     try:
@@ -194,6 +194,36 @@ async def get_emails():
         return emails
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error reading emails: {str(e)}")
+
+@app.get("/api/waitlist")
+async def get_waitlist():
+    """Get waitlist entries."""
+    try:
+        waitlist_file = DATA_DIR / "waitlist.json"
+        if not waitlist_file.exists():
+            return []
+        
+        with open(waitlist_file, 'r') as f:
+            waitlist = json.load(f)
+        
+        return waitlist
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading waitlist: {str(e)}")
+
+@app.get("/api/freed-slots")
+async def get_freed_slots():
+    """Get freed appointment slots."""
+    try:
+        freed_slots_file = DATA_DIR / "freed_slots.json"
+        if not freed_slots_file.exists():
+            return []
+        
+        with open(freed_slots_file, 'r') as f:
+            freed_slots = json.load(f)
+        
+        return freed_slots
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading freed slots: {str(e)}")
 
 @app.post("/api/demo/reset")
 async def reset_demo_data(request: DemoResetRequest):
@@ -463,7 +493,7 @@ async def root():
             <div class="section">
                 <h2 class="section-title">🖥️ User Interface Pages</h2>
                 <div class="url-grid">
-                    <a href="/schedule.html" class="url-card">
+                    <a href="/schedule.html" target="_blank" class="url-card">
                         <div class="url-header">
                             <span class="url-icon">📅</span>
                             <span class="url-title">Appointment Schedule</span>
@@ -472,7 +502,7 @@ async def root():
                         <div class="url-desc">Interactive calendar showing all appointments, provider availability, and real-time scheduling</div>
                     </a>
                     
-                    <a href="/emails.html" class="url-card">
+                    <a href="/emails.html" target="_blank" class="url-card">
                         <div class="url-header">
                             <span class="url-icon">📧</span>
                             <span class="url-title">Patient Emails</span>
@@ -481,7 +511,7 @@ async def root():
                         <div class="url-desc">View AI-generated patient communications, confirmations, and rescheduling notifications</div>
                     </a>
                     
-                    <a href="/reset.html" class="url-card">
+                    <a href="/reset.html" target="_blank" class="url-card">
                         <div class="url-header">
                             <span class="url-icon">🔄</span>
                             <span class="url-title">Demo Reset Control</span>
@@ -496,7 +526,7 @@ async def root():
             <div class="section">
                 <h2 class="section-title">📚 API Documentation</h2>
                 <div class="url-grid">
-                    <a href="/docs" class="url-card">
+                    <a href="/docs" target="_blank" class="url-card">
                         <div class="url-header">
                             <span class="url-icon">📖</span>
                             <span class="url-title">Interactive API Docs</span>
@@ -505,7 +535,7 @@ async def root():
                         <div class="url-desc">Swagger UI with interactive API testing, request/response examples, and endpoint documentation</div>
                     </a>
                     
-                    <a href="/redoc" class="url-card">
+                    <a href="/redoc" target="_blank" class="url-card">
                         <div class="url-header">
                             <span class="url-icon">📋</span>
                             <span class="url-title">ReDoc Documentation</span>
@@ -514,7 +544,7 @@ async def root():
                         <div class="url-desc">Clean, readable API documentation with detailed schemas and examples</div>
                     </a>
                     
-                    <a href="/openapi.json" class="url-card">
+                    <a href="/openapi.json" target="_blank" class="url-card">
                         <div class="url-header">
                             <span class="url-icon">⚙️</span>
                             <span class="url-title">OpenAPI Schema</span>
@@ -568,7 +598,7 @@ async def root():
             <div class="section">
                 <h2 class="section-title">🔍 System Status</h2>
                 <div class="url-grid">
-                    <a href="/health" class="url-card">
+                    <a href="/health" target="_blank" class="url-card">
                         <div class="url-header">
                             <span class="url-icon">💚</span>
                             <span class="url-title">Health Check</span>

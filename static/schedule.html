@@ -1191,13 +1191,18 @@
         </div>
 
         <div class="footer">
-            <a href="http://localhost:8501/" class="btn btn-primary">🏠 Back to Chat</a>
-            <a href="http://localhost:8000/emails.html" class="btn btn-secondary">📧 View Emails</a>
+            <a href="/" class="btn btn-primary">🏠 Back to Home</a>
+            <a href="/emails.html" class="btn btn-secondary">📧 View Emails</a>
             <button onclick="loadSchedule()" class="btn btn-success">🔄 Refresh</button>
         </div>
     </div>
 
     <script>
+        // Get base URL dynamically - works for any host/port
+        const getBaseUrl = () => {
+            return `${window.location.protocol}//${window.location.host}`;
+        };
+
         let currentDate = new Date();
         let currentView = 'day';
         let appointments = [];
@@ -1272,10 +1277,11 @@
 
         async function loadData() {
             try {
+                const baseUrl = getBaseUrl();
                 const [aptsRes, provsRes, patsRes] = await Promise.all([
-                    fetch('http://localhost:8000/api/appointments'),
-                    fetch('http://localhost:8000/api/providers'),
-                    fetch('http://localhost:8000/api/patients')
+                    fetch(`${baseUrl}/api/appointments`),
+                    fetch(`${baseUrl}/api/providers`),
+                    fetch(`${baseUrl}/api/patients`)
                 ]);
 
                 appointments = await aptsRes.json();
@@ -1887,7 +1893,8 @@
             
             try {
                 // Trigger the workflow via API with date range
-                const response = await fetch('http://localhost:8000/api/trigger-workflow', {
+                const baseUrl = getBaseUrl();
+                const response = await fetch(`${baseUrl}/api/trigger-workflow`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -2322,7 +2329,8 @@
                 document.body.appendChild(loadingDiv);
                 
                 // Call API to cancel appointment
-                const response = await fetch(`http://localhost:8000/api/appointments/${appointmentId}/cancel`, {
+                const baseUrl = getBaseUrl();
+                const response = await fetch(`${baseUrl}/api/appointments/${appointmentId}/cancel`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2372,9 +2380,10 @@
         
         async function loadWaitlistData() {
             try {
+                const baseUrl = getBaseUrl();
                 const [waitlistRes, slotsRes] = await Promise.all([
-                    fetch('http://localhost:8000/api/waitlist'),
-                    fetch('http://localhost:8000/api/freed-slots')
+                    fetch(`${baseUrl}/api/waitlist`),
+                    fetch(`${baseUrl}/api/freed-slots`)
                 ]);
                 
                 const waitlist = await waitlistRes.json();
@@ -2626,7 +2635,8 @@
         // Load waitlist count on page load
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                const res = await fetch('http://localhost:8000/api/waitlist');
+                const baseUrl = getBaseUrl();
+                const res = await fetch(`${baseUrl}/api/waitlist`);
                 const waitlist = await res.json();
                 updateWaitlistBadge(waitlist.length);
             } catch (error) {

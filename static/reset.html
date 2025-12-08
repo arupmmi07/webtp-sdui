@@ -196,8 +196,14 @@
             statusDiv.style.display = 'block';
             statusDiv.textContent = '🔄 Resetting demo data...';
             
+            // Get base URL dynamically
+            const getBaseUrl = () => {
+                return `${window.location.protocol}//${window.location.host}`;
+            };
+
             try {
-                const response = await fetch('/api/demo/reset', {
+                const baseUrl = getBaseUrl();
+                const response = await fetch(`${baseUrl}/api/demo/reset`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
