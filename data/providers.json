@@ -1,7 +1,7 @@
 [
   {
     "provider_id": "T001",
-    "name": "Dr. Sarah Johnson",
+    "name": "Sarah Johnson",
     "specialty": "Orthopedic Physical Therapy",
     "gender": "female",
     "status": "active",
@@ -58,7 +58,7 @@
   },
   {
     "provider_id": "P001",
-    "name": "Dr. Emily Ross",
+    "name": "Emily Ross",
     "specialty": "Sports Physical Therapy",
     "gender": "female",
     "status": "active",
@@ -110,7 +110,7 @@
   },
   {
     "provider_id": "P003",
-    "name": "Dr. James Wilson",
+    "name": "James Wilson",
     "specialty": "Acupuncture & Manual Therapy",
     "gender": "male",
     "status": "active",
@@ -163,7 +163,7 @@
   },
   {
     "provider_id": "P004",
-    "name": "Dr. Michael Lee",
+    "name": "Michael Lee",
     "specialty": "Geriatric Physical Therapy",
     "gender": "male",
     "status": "active",
@@ -215,7 +215,7 @@
   },
   {
     "provider_id": "P005",
-    "name": "Dr. Anna Martinez",
+    "name": "Anna Martinez",
     "specialty": "Orthopedic Physical Therapy",
     "gender": "female",
     "status": "active",
@@ -268,7 +268,7 @@
   },
   {
     "provider_id": "P006",
-    "name": "Dr. Robert Kim",
+    "name": "Robert Kim",
     "specialty": "Sports Medicine Physical Therapy",
     "gender": "male",
     "status": "active",
