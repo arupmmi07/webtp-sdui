@@ -1372,9 +1372,12 @@
             let html = '<div class="calendar-grid">';
             
             // Providers label row
-            html += '<div style="display: contents;">';
-            html += '<div class="time-label-header"></div>'; // Empty for Time column
-            html += `<div style="grid-column: 2 / span ${displayProviders.length}; text-align: center; font-weight: 700; font-size: 18px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px 8px 0 0;">Providers</div>`;
+            html += '<div class="calendar-header">';
+            html += '<div class="time-label-header" style="background: transparent; border: none;"></div>'; // Empty for Time column
+            displayProviders.forEach((provider, index) => {
+                const style = index === 0 ? 'border-radius: 8px 0 0 0;' : (index === displayProviders.length - 1 ? 'border-radius: 0 8px 0 0;' : '');
+                html += `<div class="provider-header" style="text-align: center; font-weight: 700; font-size: 18px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; ${style}">${index === Math.floor(displayProviders.length / 2) ? 'Providers' : ''}</div>`;
+            });
             html += '</div>';
             
             // Header row with provider names
