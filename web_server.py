@@ -209,7 +209,33 @@ async def confirm_appointment(token: str, action: str = "accept"):
                     email['status'] = "declined"
                     break
             
-            message = f"❌ Appointment {token} declined. We'll help you reschedule."
+            # Add declined patient to waitlist for rescheduling
+            try:
+                # Load patients to get patient details
+                patients_file = DATA_DIR / "patients.json"
+                if patients_file.exists():
+                    with open(patients_file, 'r') as f:
+                        patients = json.load(f)
+                    
+                    # Find the patient
+                    patient = None
+                    for p in patients:
+                        if p.get('patient_id') == appointment.get('patient_id'):
+                            patient = p
+                            break
+                    
+                    if patient:
+                        # Add to waitlist
+                        _add_to_waitlist(appointment, patient, "Patient declined appointment - requesting reschedule")
+                        print(f"✅ Added declined patient {patient.get('name')} to waitlist")
+                    else:
+                        print(f"⚠️  Patient not found for appointment {token}")
+                else:
+                    print("⚠️  Patients file not found")
+            except Exception as e:
+                print(f"⚠️  Error adding declined patient to waitlist: {e}")
+            
+            message = f"❌ Appointment {token} declined. You've been added to our waitlist for rescheduling."
             
         else:
             raise HTTPException(status_code=400, detail="Invalid action. Use 'accept' or 'decline'")

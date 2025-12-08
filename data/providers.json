@@ -18,7 +18,11 @@
       "Thursday",
       "Friday"
     ],
-    "unavailable_dates": [],
+    "unavailable_dates": [
+      "2025-12-08",
+      "2025-12-09",
+      "2025-12-10"
+    ],
     "working_hours_start": "08:00",
     "working_hours_end": "17:00",
     "current_patient_load": 0,
@@ -180,7 +184,11 @@
       "Thursday",
       "Friday"
     ],
-    "unavailable_dates": [],
+    "unavailable_dates": [
+      "2025-12-10",
+      "2025-12-11",
+      "2025-12-12"
+    ],
     "working_hours_start": "08:00",
     "working_hours_end": "16:00",
     "current_patient_load": 0,
