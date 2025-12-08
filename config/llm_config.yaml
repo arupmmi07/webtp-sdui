@@ -1,16 +1,16 @@
 # LLM Provider Configuration
 # Swap provider by changing the 'provider' field
 
-provider: azure  # Options: azure, anthropic, openai, ollama, gemini
+provider: ${ORCHESTRATION_LLM_PROVIDER:-azure}
 
-# Azure OpenAI Configuration (if using Azure OpenAI on GCP)
+# Azure OpenAI Configuration
 azure:
-  model: ${AZURE_DEPLOYMENT_NAME}
-  api_key: ${AZURE_API_KEY}
-  api_base: ${AZURE_API_BASE}
-  api_version: ${AZURE_API_VERSION:-2024-02-15-preview}
-  max_tokens: 4096
-  temperature: 0.7
+  model: ${ORCHESTRATION_LLM_MODEL:-gpt-5-chat}
+  api_key: ${ORCHESTRATION_LLM_AZURE_API_KEY}
+  api_base: ${ORCHESTRATION_LLM_AZURE_ENDPOINT}
+  api_version: ${ORCHESTRATION_LLM_AZURE_API_VERSION:-2025-03-01-preview}
+  max_tokens: ${ORCHESTRATION_LLM_MAX_TOKENS:-2000}
+  temperature: ${ORCHESTRATION_LLM_TEMPERATURE:-0.7}
 
 # Anthropic (Claude) Configuration
 anthropic:
