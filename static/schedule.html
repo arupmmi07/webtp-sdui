@@ -427,6 +427,11 @@
             border-color: #4caf50;
         }
         
+        .appointment-block.rescheduled {
+            background: #fff3e0;
+            border-color: #ff9800;
+        }
+        
         .appointment-block.reassigned {
             background: #fff9c4;
             border-color: #fdd835;
@@ -663,6 +668,7 @@
         .status-badge.completed { background: #17a2b8; }
         .status-badge.cancelled { background: #dc3545; }
         .status-badge.confirmed { background: #4caf50; color: white; }
+        .status-badge.rescheduled { background: #ff9800; color: white; }
         .status-badge.pending { background: #03a9f4; color: white; }
         .status-badge.needs_attention { background: #ffc107; color: #333; }
         
@@ -1326,8 +1332,8 @@
             providerAvailability = {};
             
             providers.forEach(provider => {
-                // Check 1: Status field (sick, on_leave, unavailable)
-                if (provider.status && ['sick', 'on_leave', 'unavailable'].includes(provider.status)) {
+                // Check 1: Status field (sick, on_leave, unavailable, left_organization)
+                if (provider.status && ['sick', 'on_leave', 'unavailable', 'left_organization'].includes(provider.status)) {
                     providerAvailability[provider.provider_id] = 'unavailable';
                     return;
                 }
@@ -1355,7 +1361,8 @@
             const dateStr = formatDate(date);
             return appointments.filter(apt => 
                 apt.date.startsWith(dateStr) && 
-                apt.provider_id === providerId
+                apt.provider_id === providerId &&
+                apt.status !== 'cancelled'     // Don't show cancelled appointments on provider calendar
             );
         }
 
@@ -1732,11 +1739,15 @@
                             // Orange/Amber - HOD Manual Review Required
                             statusClass = 'needs-attention hod-review';
                             statusBadge = '<span class="attention-badge hod-badge">⚠️ HOD REVIEW</span>';
+                        } else if (appointment.status === 'rescheduled' || appointment.reassigned) {
+                            // Orange - Rescheduled, needs patient confirmation
+                            statusClass = 'rescheduled';
+                            statusBadge = '<span class="status-badge rescheduled">📲 PENDING CONFIRMATION</span>';
                         } else if (appointment.status === 'confirmed' || appointment.confirmation_status === 'confirmed') {
                             // Green - Confirmed by patient
                             statusClass = 'confirmed';
                             statusBadge = '<span class="status-badge confirmed">✅ CONFIRMED</span>';
-                        } else if (appointment.status === 'pending_confirmation' || appointment.confirmation_status === 'pending' || appointment.reassigned) {
+                        } else if (appointment.status === 'pending_confirmation' || appointment.confirmation_status === 'pending') {
                             // Light blue/yellow - Pending confirmation
                             statusClass = 'pending_confirmation';
                             statusBadge = '<span class="status-badge pending">📲 PENDING</span>';
@@ -1853,6 +1864,47 @@
             showUnavailableModal(providerId, providerName);
         }
         
+        async function updateProviderStatus(providerId, durationType, startDate, endDate, reason) {
+            // Update provider status in the local data and on server
+            const baseUrl = getBaseUrl();
+            
+            // Find the provider in our local data
+            const provider = providers.find(p => p.provider_id === providerId);
+            if (!provider) {
+                console.error('Provider not found:', providerId);
+                return;
+            }
+            
+            // Update provider status based on duration type
+            if (durationType === 'left_organization') {
+                provider.status = 'left_organization';
+                provider.unavailable_dates = []; // Clear specific dates since permanently unavailable
+            } else {
+                provider.status = 'active'; // Keep active but add unavailable dates
+                
+                // Initialize unavailable_dates if not present
+                if (!provider.unavailable_dates) {
+                    provider.unavailable_dates = [];
+                }
+                
+                // Generate date range and add to unavailable dates
+                const start = new Date(startDate);
+                const end = new Date(endDate || startDate);
+                
+                const current = new Date(start);
+                while (current <= end) {
+                    const dateStr = current.toISOString().split('T')[0]; // YYYY-MM-DD format
+                    if (!provider.unavailable_dates.includes(dateStr)) {
+                        provider.unavailable_dates.push(dateStr);
+                    }
+                    current.setDate(current.getDate() + 1);
+                }
+            }
+            
+            // Update the provider availability calculation
+            calculateProviderAvailability();
+        }
+        
         async function confirmMarkUnavailable(providerId, providerName) {
             // Get form values
             const reason = document.getElementById('unavailable-reason').value;
@@ -1860,6 +1912,7 @@
             
             let startDate = formatDate(currentDate);
             let endDate = startDate;
+            let permanent = false;
             
             // Calculate end date based on duration type
             const current = new Date(currentDate);
@@ -1877,6 +1930,13 @@
                     startDate = document.getElementById('custom-start-date').value;
                     endDate = document.getElementById('custom-end-date').value;
                     break;
+                case 'left_organization':
+                    // For providers who left, use a 2-month date range to capture all future appointments
+                    permanent = true;
+                    const twoMonthsFromNow = new Date(current);
+                    twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
+                    endDate = formatDate(twoMonthsFromNow);
+                    break;
             }
             
             // Close modal
@@ -1892,18 +1952,28 @@
             document.body.appendChild(statusDiv);
             
             try {
-                // Trigger the workflow via API with date range
+                // First, update the provider status in the data
+                await updateProviderStatus(providerId, durationType, startDate, endDate, reason);
+                
+                // Then trigger the workflow via the existing API
                 const baseUrl = getBaseUrl();
+                const requestBody = {
+                        trigger_type: 'provider_unavailable',
+                        provider_id: providerId,
+                    reason: durationType === 'left_organization' ? 'left_organization' : reason,
+                        start_date: startDate,
+                        end_date: endDate
+                };
+                
+                // Add metadata for permanent status
+                if (permanent) {
+                    requestBody.metadata = { permanent: true, left_organization: true };
+                }
+                
                 const response = await fetch(`${baseUrl}/api/trigger-workflow`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        trigger_type: 'provider_unavailable',
-                        provider_id: providerId,
-                        reason: reason,
-                        start_date: startDate,
-                        end_date: endDate
-                    })
+                    body: JSON.stringify(requestBody)
                 });
                 
                 if (!response.ok) {
@@ -1933,8 +2003,9 @@
                         ${methodIcon} <strong>${methodText}</strong>
                     </div>
                     <div style="font-size:13px; margin-top:8px; opacity:0.9;">
-                        • Patients reassigned: ${result.assignments?.length || 0}<br>
+                        • Patients reassigned: ${result.affected_appointments_count || 0}<br>
                         • Emails sent: ${result.emails_sent || 0}<br>
+                        ${permanent ? '• Status: Permanently unavailable<br>' : ''}
                         • <span style="text-decoration:underline; cursor:pointer;" onclick="showAuditLog()">View audit log →</span>
                     </div>
                 `;
@@ -1942,7 +2013,7 @@
                 // Reload calendar after 2 seconds
                 setTimeout(() => {
                     statusDiv.remove();
-                    loadSchedule();
+                    loadData(); // Reload all data including updated provider status
                 }, 3000);
                 
             } catch (error) {
@@ -2208,8 +2279,29 @@
             
             // Specialty match
             if (patient.condition && provider.specialty) {
-                const match = patient.condition.toLowerCase().includes(provider.specialty.toLowerCase().split(' ')[0]);
-                factors.push(`✓ Specialty: ${provider.specialty} ${match ? '(✅ Match)' : '(⚠️ Partial)'}`);
+                // Check if provider specialty matches patient's needed specialty
+                const patientCondition = patient.condition.toLowerCase();
+                const providerSpecialty = provider.specialty.toLowerCase();
+                
+                // Define specialty matching rules
+                const isOrthopedicMatch = (patientCondition.includes('knee') || 
+                                         patientCondition.includes('back') || 
+                                         patientCondition.includes('joint') || 
+                                         patientCondition.includes('surgical') ||
+                                         patientCondition.includes('orthopedic')) && 
+                                        providerSpecialty.includes('orthopedic');
+                
+                const isNeuroMatch = (patientCondition.includes('stroke') || 
+                                    patientCondition.includes('neuro') || 
+                                    patientCondition.includes('brain')) && 
+                                   providerSpecialty.includes('neuro');
+                
+                const isCardiacMatch = (patientCondition.includes('cardiac') || 
+                                      patientCondition.includes('heart')) && 
+                                     providerSpecialty.includes('cardiac');
+                
+                const match = isOrthopedicMatch || isNeuroMatch || isCardiacMatch;
+                factors.push(`✓ Specialty: ${provider.specialty} ${match ? '(✅ Perfect Match)' : '(⚠️ Partial)'}`);
             }
             
             // Location/Distance

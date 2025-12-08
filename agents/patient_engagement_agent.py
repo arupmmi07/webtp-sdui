@@ -386,33 +386,13 @@ The links will be added separately after your message. Just provide the message 
                 return message
                 
             except Exception as e:
-                print(f"[EMAIL] Warning: LangFuse prompt/LLM call failed: {e}")
+                print(f"[EMAIL] ❌ LangFuse prompt/LLM call failed: {e}")
                 import traceback
                 traceback.print_exc()
-                print(f"[EMAIL] Falling back to template")
-                # Fall through to template
+                raise Exception(f"Failed to generate patient message from LangFuse: {e}. Please check LangFuse configuration.")
         
-        # Use template (default or fallback)
-        patient_name = patient.get("name", "Patient")
-        provider_name = provider.get("name", "Provider")
-        provider_specialty = provider.get("specialty", "Physical Therapy")
-        
-        message = f"""Hi {patient_name},
-
-Your therapist has an unexpected absence. We'd like to reassign your appointment to:
-
-👨‍⚕️ {provider_name}
-📋 {provider_specialty}
-📅 {date} at {time}
-
-This provider is available and matches your needs based on your preferences.
-
-Please let us know if this works for you. If you have any questions or concerns, please don't hesitate to reach out.
-
-Thank you!
-Metro Physical Therapy"""
-        
-        return message
+        # This should never be reached since we're LangFuse-only now
+        raise Exception("LangFuse is required for patient engagement messages. No local fallback available.")
     
     def send_confirmation(
         self,

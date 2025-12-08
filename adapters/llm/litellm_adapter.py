@@ -143,6 +143,14 @@ class LiteLLMAdapter(BaseLLM):
                 "temperature": temperature,
             }
             
+            # Log LLM call details
+            print(f"🤖 [LLM CALL] Model: {self.model}")
+            print(f"🤖 [LLM CALL] API Base: {self.api_base}")
+            print(f"🤖 [LLM CALL] Messages: {len(messages)} messages")
+            print(f"🤖 [LLM CALL] Prompt length: {len(messages[-1]['content']) if messages else 0} chars")
+            print(f"🤖 [LLM CALL] Temperature: {temperature}")
+            print(f"🤖 [LLM CALL] Max tokens: {max_tokens}")
+            
             # Add API base and key if provided
             if self.api_base:
                 completion_kwargs["api_base"] = self.api_base
@@ -154,12 +162,15 @@ class LiteLLMAdapter(BaseLLM):
                 completion_kwargs["tools"] = tools
             
             # Call LiteLLM
+            print(f"🚀 [LLM CALL] Making request to {self.model}...")
             if self.router:
                 # Use router for fallbacks
                 response = self.router.completion(**completion_kwargs)
             else:
                 # Direct completion
                 response = completion(**completion_kwargs)
+            
+            print(f"✅ [LLM RESPONSE] Received response from {self.model}")
             
             # Extract content and tool calls
             message = response.choices[0].message
@@ -183,6 +194,10 @@ class LiteLLMAdapter(BaseLLM):
                     "completion_tokens": response.usage.completion_tokens,
                     "total_tokens": response.usage.total_tokens
                 }
+                print(f"📊 [LLM USAGE] Tokens: {usage['prompt_tokens']} + {usage['completion_tokens']} = {usage['total_tokens']}")
+            
+            print(f"📝 [LLM CONTENT] Response length: {len(content)} chars")
+            print(f"🏁 [LLM CALL] Completed successfully")
             
             return LLMResponse(
                 content=content,

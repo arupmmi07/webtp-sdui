@@ -320,8 +320,18 @@
         async function loadEmails() {
             try {
                 const baseUrl = getBaseUrl();
-                const response = await fetch(`${baseUrl}/api/emails`);
+                console.log('Loading emails from:', `${baseUrl}/api/emails`);
+                
+                // Add cache-busting parameter
+                const response = await fetch(`${baseUrl}/api/emails?t=${Date.now()}`);
                 const emails = await response.json();
+                
+                console.log('Loaded emails:', emails);
+                if (emails.length > 0) {
+                    console.log('First email structure:', emails[0]);
+                    console.log('First email to field:', emails[0].to);
+                    console.log('First email body field:', emails[0].body);
+                }
                 
                 displayEmails(emails);
             } catch (error) {
@@ -354,9 +364,9 @@
                                   email.status === 'declined' ? '❌' : '⏳';
                 
                 // Check if AI-generated
-                const isAI = email.generation_type === 'ai';
+                const isAI = email.template === 'ai_personalized';
                 const generationBadge = isAI ? 
-                    '<span style="background: #667eea; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-left: 8px;">🤖 AI-Generated</span>' :
+                    '<span style="background: #667eea; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-left: 8px;">🤖 AI Generated</span>' :
                     '<span style="background: #95a5a6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-left: 8px;">📝 Template</span>';
                 
                 return `
@@ -364,7 +374,7 @@
                         <div class="email-header">
                             <div class="email-subject">${statusIcon} ${email.subject || 'Provider Reassignment'}${generationBadge}</div>
                             <div class="email-meta">
-                                <span>To: ${email.patient_name} (${email.patient_email})</span>
+                                <span>To: ${email.patient_name} (${email.to})</span>
                                 <span>Date: ${new Date(email.sent_at).toLocaleString()}</span>
                                 <span class="status-badge ${statusClass}">${email.status.toUpperCase()}</span>
                             </div>
@@ -374,12 +384,12 @@
                             <p><strong>New Provider:</strong> ${email.provider_name}</p>
                             <p><strong>Date & Time:</strong> ${email.date} at ${email.time}</p>
                             <hr style="margin: 15px 0; border: none; border-top: 1px solid #ecf0f1;">
-                            <div style="white-space: pre-wrap;">${email.message}</div>
+                            <div style="white-space: pre-wrap;">${email.body}</div>
                             ${email.status === 'pending' ? `
                                 <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                                     <p style="margin: 0 0 12px 0; font-weight: 600; color: #333;">Please let us know your preference:</p>
                                     <div style="display: flex; gap: 10px; align-items: center;">
-                                        <a href="${email.accept_url}" target="_blank" 
+                                        <a href="${getBaseUrl()}${email.confirm_url}" target="_blank" 
                                            onclick="event.stopPropagation();"
                                            style="display: inline-flex; align-items: center; justify-content: center; 
                                                   padding: 10px 24px; background: #27ae60; color: white; 
@@ -387,7 +397,7 @@
                                                   transition: background 0.2s; cursor: pointer;">
                                             ✅ Accept Appointment
                                         </a>
-                                        <a href="${email.decline_url}" target="_blank" 
+                                        <a href="${getBaseUrl()}${email.decline_url}" target="_blank" 
                                            onclick="event.stopPropagation();"
                                            style="display: inline-flex; align-items: center; justify-content: center; 
                                                   padding: 10px 24px; background: #e74c3c; color: white; 

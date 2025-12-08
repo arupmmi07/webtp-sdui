@@ -39,11 +39,11 @@ class LLMSettings:
     # Token Settings
     # ============================================================
     
-    # Maximum tokens for template-driven orchestrator
-    ORCHESTRATOR_MAX_TOKENS = int(os.getenv("LLM_ORCHESTRATOR_MAX_TOKENS", "4000"))
+    # Maximum tokens for template-driven orchestrator (Azure GPT-5 max: 16384)
+    ORCHESTRATOR_MAX_TOKENS = int(os.getenv("LLM_ORCHESTRATOR_MAX_TOKENS", "8000"))
     
     # Maximum tokens for smart scheduling agent
-    SCHEDULING_MAX_TOKENS = int(os.getenv("LLM_SCHEDULING_MAX_TOKENS", "2000"))
+    SCHEDULING_MAX_TOKENS = int(os.getenv("ORCHESTRATION_LLM_MAX_TOKENS", "2000"))
     
     # Maximum tokens for patient engagement
     ENGAGEMENT_MAX_TOKENS = int(os.getenv("LLM_ENGAGEMENT_MAX_TOKENS", "1000"))
@@ -57,7 +57,7 @@ class LLMSettings:
     ORCHESTRATOR_TEMPERATURE = float(os.getenv("LLM_ORCHESTRATOR_TEMPERATURE", "0.3"))
     
     # Temperature for scheduling (matching logic)
-    SCHEDULING_TEMPERATURE = float(os.getenv("LLM_SCHEDULING_TEMPERATURE", "0.2"))
+    SCHEDULING_TEMPERATURE = float(os.getenv("ORCHESTRATION_LLM_TEMPERATURE", "0.2"))
     
     # Temperature for patient messages (more creative)
     ENGAGEMENT_TEMPERATURE = float(os.getenv("LLM_ENGAGEMENT_TEMPERATURE", "0.7"))

@@ -145,6 +145,13 @@ class AppointmentReassignRequest(BaseModel):
     new_provider_id: str
     reason: Optional[str] = "Provider reassignment"
 
+class ProviderUnavailableRequest(BaseModel):
+    provider_id: str
+    reason: str  # sick, vacation, emergency, left_organization
+    start_date: str  # YYYY-MM-DD
+    end_date: Optional[str] = None  # YYYY-MM-DD, defaults to start_date
+    permanent: bool = False  # True if provider has left organization
+
 class WaitlistEntry(BaseModel):
     waitlist_id: Optional[str] = None
     patient_id: str

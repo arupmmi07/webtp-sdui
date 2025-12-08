@@ -81,13 +81,36 @@ class TemplateDrivenOrchestrator:
         if llm:
             self.llm = llm
         elif LITELLM_AVAILABLE:
-            self.llm = LiteLLMAdapter(
-                model=os.getenv("LITELLM_DEFAULT_MODEL", "gpt-oss-20b"),
-                api_base=os.getenv("LITELLM_BASE_URL", "http://localhost:4000"),
-                api_key=os.getenv("LITELLM_API_KEY", "sk-1234"),
-                enable_langfuse=use_langfuse
-            )
-            print("[ORCHESTRATOR] LiteLLM initialized")
+            # Use Azure configuration if available
+            provider = os.getenv("ORCHESTRATION_LLM_PROVIDER", "local")
+            
+            if provider == "azure":
+                # Azure OpenAI configuration
+                model = os.getenv("ORCHESTRATION_LLM_MODEL", "gpt-4")
+                api_base = os.getenv("ORCHESTRATION_LLM_AZURE_ENDPOINT")
+                api_key = os.getenv("ORCHESTRATION_LLM_AZURE_API_KEY")
+                
+                if api_base and api_key:
+                    self.llm = LiteLLMAdapter(
+                        model=f"azure/{model}",
+                        api_base=api_base,
+                        api_key=api_key,
+                        enable_langfuse=use_langfuse
+                    )
+                    print(f"[ORCHESTRATOR] Azure LLM initialized ({model})")
+                else:
+                    print("[ORCHESTRATOR] Warning: Azure config incomplete, falling back to local")
+                    provider = "local"
+            
+            if provider != "azure":
+                # Local LiteLLM configuration (fallback)
+                self.llm = LiteLLMAdapter(
+                    model=os.getenv("LITELLM_DEFAULT_MODEL", "gpt-oss-20b"),
+                    api_base=os.getenv("LITELLM_BASE_URL", "http://localhost:4000"),
+                    api_key=os.getenv("LITELLM_API_KEY", "sk-1234"),
+                    enable_langfuse=use_langfuse
+                )
+                print("[ORCHESTRATOR] Local LiteLLM initialized")
         else:
             raise Exception("LLM required for template-driven orchestration")
     
@@ -269,11 +292,8 @@ class TemplateDrivenOrchestrator:
                 return compiled_prompt
                 
             except Exception as e:
-                print(f"[PROMPT] Warning: LangFuse fetch failed: {e}")
-                print("[PROMPT] Falling back to local template")
-        
-        # Fallback to local template
-        return self.get_local_template(metadata)
+                print(f"[PROMPT] ❌ LangFuse fetch failed: {e}")
+                raise Exception(f"Failed to fetch prompt from LangFuse: {e}. Please check LangFuse configuration.")
     
     def _format_patients_section(self, patients_data: List[Dict[str, Any]]) -> str:
         """Format patients section for prompt."""
@@ -323,189 +343,6 @@ Consider offering these slots to patients who value continuity of care.
 """
         return ""
     
-    def get_local_template(self, metadata: Dict[str, Any]) -> str:
-        """Local prompt template with variable substitution."""
-        
-        # Format sections using helper methods
-        patients_section = self._format_patients_section(metadata['patients'])
-        providers_section = self._format_providers_section(metadata['available_providers'])
-        continuity_info = self._format_continuity_info(metadata)
-        
-        # Build full prompt - AGENTIC APPROACH
-        # LLM reasons autonomously about provider-patient matches
-        
-        prompt = f"""You are an AI Healthcare Operations Orchestrator. Your task is to autonomously reassign patients from an unavailable provider to the best alternative providers using a TWO-TIER MATCHING APPROACH.
-
-SITUATION:
-Provider {metadata['provider_name']} (ID: {metadata['provider_id']}) is unavailable on {metadata['date']}.
-Total affected appointments: {metadata['total_affected']}
-
-AFFECTED PATIENTS:
-{patients_section}
-
-AVAILABLE PROVIDERS:
-{providers_section}
-{continuity_info}
-
-TWO-TIER MATCHING APPROACH:
-
-TIER 1 - EXACT MATCH (MUST HAVE - Hard Requirements):
-These are CRITICAL requirements that MUST be met. If no provider meets ALL Tier 1 requirements, the patient MUST be assigned to waitlist/HOD review.
-
-1. **Specialty Match (CRITICAL):**
-   - If patient has a specific condition requiring a specialty (e.g., "orthopedic", "sports medicine", "geriatric"), the provider MUST have that exact specialty or a closely related one that can handle the condition.
-   - Example: Patient with "post-surgical knee" requires "orthopedic" or "sports medicine" specialty. If NO provider has these specialties, assign to waitlist.
-   - If patient condition is general (e.g., "lower back pain") and no specific specialty is required, any provider can be considered.
-
-2. **Provider Availability (CRITICAL):**
-   - Provider MUST have available slots on the appointment date or within acceptable timeframe.
-   - Provider MUST not be at maximum capacity (current_patient_load < max_patient_capacity).
-
-3. **Basic Feasibility (CRITICAL):**
-   - Provider MUST be active and available for appointments.
-   - Provider location MUST be within patient's max_distance_miles (if specified).
-
-TIER 2 - PREFERENCE MATCH (NICE TO HAVE - Soft Requirements):
-These are preferences used to RANK and SELECT the best provider from those that meet Tier 1 requirements.
-
-1. **Gender Preference:**
-   - Patient's gender preference (if specified)
-   - If "any" or not specified, this is not a requirement
-
-2. **Day Preference:**
-   - Patient's preferred days of the week
-   - Earlier time slots preferred
-
-3. **Location/Proximity:**
-   - Same zip code preferred
-   - Closer locations preferred
-
-4. **Continuity of Care:**
-   - Prior provider relationships (check patient's prior_providers list)
-   - Same provider on different day (if continuity slots available)
-
-5. **Experience Level:**
-   - Provider experience matching or exceeding patient needs
-   - Years of experience
-
-6. **Load Balancing:**
-   - Prefer providers with lower current patient load
-   - Distribute appointments evenly
-
-MATCHING LOGIC:
-
-STEP 1 - TIER 1 FILTERING:
-For each patient:
-1. Check if patient requires a specific specialty (from condition_specialty_required field)
-2. Filter providers to ONLY those that:
-   - Have the required specialty (or can handle the condition)
-   - Have available slots
-   - Are within capacity limits
-   - Are within distance limits (if max_distance_miles specified)
-3. If NO providers pass Tier 1 filtering → assign to waitlist with action: "waitlist"
-4. If providers pass Tier 1 filtering → proceed to Tier 2 ranking
-
-STEP 2 - TIER 2 RANKING:
-From providers that passed Tier 1:
-1. Rank providers based on Tier 2 preferences
-2. Select the best match considering:
-   - Gender preference match
-   - Day preference match
-   - Location proximity
-   - Continuity of care
-   - Experience level
-   - Load balancing
-3. Assign to the highest-ranked provider
-
-DECISION QUALITY:
-- EXCELLENT: All Tier 1 requirements met + Most Tier 2 preferences met
-- GOOD: All Tier 1 requirements met + Some Tier 2 preferences met
-- ACCEPTABLE: All Tier 1 requirements met + Few Tier 2 preferences met
-- POOR: Tier 1 requirements NOT met → MUST assign to waitlist
-
-IMPORTANT RULES:
-1. NEVER assign a patient if Tier 1 requirements are not met - always waitlist
-2. Specialty mismatch (when specialty is required) is a Tier 1 blocker - do not assign
-3. If patient has restrictive requirements (e.g., weekend-only, very specific specialty) and no provider matches, waitlist immediately
-4. Use Tier 2 preferences only to rank among providers that meet Tier 1 requirements
-5. Provide clear reasoning explaining Tier 1 pass/fail and Tier 2 ranking
-
-CONTINUITY & RESCHEDULING RULES:
-1. **Short unavailability (1-2 days)**: PREFER rescheduling with the SAME provider on a different available date
-   - Check if the original provider has available slots within the next 7 days
-   - If yes, reschedule to maintain continuity of care
-   - Send email: "Your appointment has been rescheduled to [new date] with the same provider"
-   
-2. **Extended unavailability (3+ days)**: Reassign to a DIFFERENT provider based on specialty matching
-   - Original provider unavailable for extended period
-   - Match patient to best alternative provider using Tier 1 & Tier 2 criteria
-   - Send email: "Your provider is unavailable. We've matched you with [new provider name]"
-
-3. **Weekend/Holiday handling**: 
-   - Providers do NOT work on Saturdays and Sundays
-   - NEVER schedule appointments on weekends
-   - If unavailability spans a weekend, skip Sat/Sun when counting days
-   - Only consider weekday slots (Monday-Friday) for rescheduling
-
-OUTPUT FORMAT (JSON):
-For each patient, provide your autonomous decision with reasoning:
-
-{{
-  "assignments": [
-    {{
-      "appointment_id": "A001",
-      "patient_id": "PAT001",
-      "patient_name": "Maria Rodriguez",
-      "assigned_to": "P001",
-      "assigned_to_name": "Dr. Emily Ross",
-      "match_quality": "EXCELLENT",
-      "reasoning": "Tier 1: ✅ Specialty match (orthopedic required, provider has orthopedic specialty), ✅ Available slots, ✅ Within capacity. Tier 2: ✅ Gender preference met (female), ✅ Same zip code, ✅ Day preference met (Thursday), ✅ Continuity with prior provider. Excellent overall match.",
-      "match_factors": {{
-        "tier1_specialty_match": true,
-        "tier1_availability": true,
-        "tier1_capacity": true,
-        "tier2_gender_preference_met": true,
-        "tier2_location_match": true,
-        "tier2_day_preference_met": true,
-        "tier2_continuity": true
-      }},
-      "action": "assign"
-    }},
-    {{
-      "appointment_id": "A002",
-      "patient_id": "PAT002",
-      "patient_name": "John Davis",
-      "assigned_to": null,
-      "assigned_to_name": null,
-      "match_quality": "POOR",
-      "reasoning": "Tier 1: ❌ FAILED - Patient requires 'orthopedic' specialty but no available provider has this specialty. All providers have different specialties (sports medicine, acupuncture, geriatric) that cannot handle orthopedic conditions. Must waitlist for HOD review.",
-      "match_factors": {{
-        "tier1_specialty_match": false,
-        "tier1_availability": true,
-        "tier1_capacity": true
-      }},
-      "action": "waitlist"
-    }}
-  ],
-  "summary": {{
-    "total_processed": 2,
-    "successful_assignments": 1,
-    "waitlist_entries": 1
-  }}
-}}
-
-IMPORTANT:
-- ALWAYS check Tier 1 requirements FIRST
-- If Tier 1 fails, assign to waitlist immediately (do not proceed to Tier 2)
-- Only use Tier 2 preferences to rank providers that pass Tier 1
-- Clearly state in reasoning which tier requirements were met/failed
-- Use match_quality: "EXCELLENT", "GOOD", "ACCEPTABLE", or "POOR"
-- If Tier 1 requirements are not met, match_quality MUST be "POOR" and action MUST be "waitlist"
-
-Provide ONLY the JSON output, no additional text.
-"""
-        
-        return prompt
     
     def execute_workflow(self, provider_id: str, start_date: str = None, end_date: str = None, 
                          date: str = None, reason: str = "unavailable") -> Dict[str, Any]:
@@ -551,11 +388,18 @@ Provide ONLY the JSON output, no additional text.
         print(f"[LLM] Prompt length: {len(prompt)} chars")
         
         try:
+            # Adjust temperature for GPT-5 (only supports 1.0)
+            temperature = llm_settings.ORCHESTRATOR_TEMPERATURE
+            model = os.getenv("ORCHESTRATION_LLM_MODEL", "gpt-4")
+            if "gpt-5" in model.lower():
+                temperature = 1.0
+                print(f"[LLM] Using temperature=1.0 for {model} (GPT-5 requirement)")
+            
             response = self.llm.generate(
                 prompt=prompt,
                 system="You are a healthcare scheduling assistant. You MUST return ONLY valid JSON with an 'assignments' array. Do not include any text before or after the JSON. The JSON must start with '{' and end with '}'.",
                 max_tokens=llm_settings.ORCHESTRATOR_MAX_TOKENS,
-                temperature=llm_settings.ORCHESTRATOR_TEMPERATURE,
+                temperature=temperature,
                 timeout=llm_settings.REQUEST_TIMEOUT
             )
             

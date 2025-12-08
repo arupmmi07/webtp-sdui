@@ -175,7 +175,7 @@ class JSONClient:
         """Get all providers.
         
         Args:
-            status: Filter by status (active, inactive, sick, on_leave)
+            status: Filter by status (active, inactive, sick, on_leave, left_organization)
         
         Returns:
             List of provider dictionaries
@@ -189,6 +189,37 @@ class JSONClient:
         
         print(f"👥 Found {len(filtered)} {status} providers")
         return filtered
+    
+    def update_provider_status(self, provider_id: str, status: str, unavailable_dates: List[str] = None) -> bool:
+        """Update provider status and unavailable dates.
+        
+        Args:
+            provider_id: Provider ID (e.g., "P001")
+            status: New status (active, sick, on_leave, unavailable, left_organization)
+            unavailable_dates: List of unavailable dates (YYYY-MM-DD format)
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            providers = self._load_json(self.providers_file)
+            
+            for provider in providers:
+                if provider.get("provider_id") == provider_id:
+                    provider["status"] = status
+                    if unavailable_dates is not None:
+                        provider["unavailable_dates"] = unavailable_dates
+                    
+                    self._save_json(self.providers_file, providers)
+                    print(f"✅ Updated provider {provider_id} status to {status}")
+                    return True
+            
+            print(f"❌ Provider {provider_id} not found")
+            return False
+            
+        except Exception as e:
+            print(f"❌ Error updating provider status: {e}")
+            return False
     
     # ===== PATIENTS =====
     

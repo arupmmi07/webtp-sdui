@@ -24,10 +24,9 @@ class PromptConfig:
 class LangFuseConfig:
     """LangFuse configuration and prompt management."""
     
-    # Prompt names (from .env) - No version suffix, LangFuse handles versioning
-    # Only 2 prompts - patient messages use templates (faster, cheaper, compliant)
-    CHAT_ROUTER = os.getenv("LANGFUSE_PROMPT_CHAT_ROUTER", "healthcare-chat-router")
-    PROVIDER_SCORER = os.getenv("LANGFUSE_PROMPT_PROVIDER_SCORER", "provider-scoring-prompt")
+    # Prompt names - Only 2 prompts used in the system
+    ORCHESTRATOR_TEMPLATE = "healthcare-orchestrator-template"
+    PATIENT_ENGAGEMENT = "patient-engagement-message"
     
     # Default to production label
     PROMPT_LABEL = os.getenv("LANGFUSE_PROMPT_LABEL", "production")
@@ -49,8 +48,8 @@ class LangFuseConfig:
     def get_prompt_name(cls, prompt_type: str) -> str:
         """Get prompt name for a given type."""
         prompt_map = {
-            "chat_router": cls.CHAT_ROUTER,
-            "provider_scorer": cls.PROVIDER_SCORER,
+            "orchestrator": cls.ORCHESTRATOR_TEMPLATE,
+            "patient_engagement": cls.PATIENT_ENGAGEMENT,
         }
         return prompt_map.get(prompt_type, "")
 
@@ -105,41 +104,8 @@ class PromptManager:
                     "config": prompt.config if hasattr(prompt, 'config') else {},
                 }
             except Exception as e:
-                print(f"⚠️  Failed to load prompt {prompt_name} (label: {label}) from LangFuse: {e}")
-        
-        # Fallback to local prompts
-        return self._get_local_prompt(prompt_name)
-    
-    def _get_local_prompt(self, prompt_name: str) -> Dict[str, Any]:
-        """Get local fallback prompt."""
-        # These are simplified versions for when LangFuse is unavailable
-        local_prompts = {
-            LangFuseConfig.CHAT_ROUTER: {
-                "name": prompt_name,
-                "system": """You are a healthcare scheduling assistant. Parse user messages and return JSON:
-{
-  "intent": "THERAPIST_UNAVAILABLE|PATIENT_DECLINED|QUERY_STATUS|GENERAL",
-  "entities": {"provider_id": "", "provider_name": "", "reason": ""},
-  "action": "process_therapist_departure",
-  "response_to_user": "I understand..."
-}""",
-                "version": "local",
-                "label": "fallback"
-            },
-            LangFuseConfig.PROVIDER_SCORER: {
-                "name": prompt_name,
-                "system": "Score providers based on continuity, specialty, location, capacity, preferences. Return JSON.",
-                "version": "local",
-                "label": "fallback"
-            },
-        }
-        
-        return local_prompts.get(prompt_name, {
-            "name": prompt_name,
-            "system": "Assistant prompt not found. Please configure LangFuse.",
-            "version": "local",
-            "label": "fallback"
-        })
+                print(f"❌ Failed to load prompt {prompt_name} (label: {label}) from LangFuse: {e}")
+                raise Exception(f"LangFuse prompt '{prompt_name}' not found. Please check LangFuse configuration.")
 
 
 # Global instance
@@ -150,7 +116,7 @@ def get_prompt(prompt_type: str, label: str = None) -> Dict[str, Any]:
     """Convenience function to get a prompt by type.
     
     Args:
-        prompt_type: Type of prompt (chat_router, provider_scorer, patient_message)
+        prompt_type: Type of prompt (orchestrator, patient_engagement)
         label: Label to fetch (e.g., "production", "staging"). Defaults to "production"
     
     Returns:
@@ -172,10 +138,9 @@ if __name__ == "__main__":
     print(f"LangFuse Configured: {LangFuseConfig.is_configured()}")
     print(f"Host: {LangFuseConfig.HOST}")
     
-    print(f"\nPrompt Names (No version suffix - LangFuse handles versioning):")
-    print(f"  Chat Router: {LangFuseConfig.CHAT_ROUTER}")
-    print(f"  Provider Scorer: {LangFuseConfig.PROVIDER_SCORER}")
-    print(f"  Patient Messages: Using email templates (config/email_templates.py)")
+    print(f"\nPrompt Names (LangFuse-only, no local fallbacks):")
+    print(f"  Orchestrator: {LangFuseConfig.ORCHESTRATOR_TEMPLATE}")
+    print(f"  Patient Engagement: {LangFuseConfig.PATIENT_ENGAGEMENT}")
     print(f"\nDefault Label: {LangFuseConfig.PROMPT_LABEL}")
     
     print(f"\nTesting prompt loading...")
