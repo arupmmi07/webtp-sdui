@@ -1081,7 +1081,6 @@ async def reset_demo(request: DemoResetRequest):
         appointments = []
         appointment_counter = 1
         current_time = datetime.now()
-        appointments_created_today = 0
         
         for day_offset in range(request.days_ahead):
             current_date = start_date + timedelta(days=day_offset)
@@ -1090,20 +1089,13 @@ async def reset_demo(request: DemoResetRequest):
             if current_date.weekday() >= 5:
                 continue
             
+            # Track used slots per provider to avoid overlaps
+            provider_slots_used = {p['provider_id']: set() for p in providers}
             appointments_for_day = 0
             patient_index = 0
             
             # Create specified number of appointments per day
-            for time_slot in time_slots:
-                if appointments_for_day >= request.appointments_per_day:
-                    break
-                    
-                # Skip past times if it's today
-                if current_date.date() == current_time.date():
-                    slot_time = datetime.strptime(time_slot, "%H:%M").time()
-                    if slot_time <= current_time.time():
-                        continue
-                
+            while appointments_for_day < request.appointments_per_day:
                 # Get patient (cycle through realistic patients)
                 if patient_index >= len(realistic_patients):
                     patient_index = 0
@@ -1126,20 +1118,39 @@ async def reset_demo(request: DemoResetRequest):
                     matched_provider = providers[0]
                 
                 if matched_provider:
-                    appointment = {
-                        "appointment_id": f"A{appointment_counter:03d}",
-                        "patient_id": patient_data['patient_id'],
-                        "provider_id": matched_provider['provider_id'],
-                        "date": current_date.strftime("%Y-%m-%dT") + time_slot + ":00",
-                        "time": time_slot,
-                        "status": "scheduled",
-                        "confirmation_number": f"CONF-{appointment_counter:03d}",
-                        "reassigned": False,
-                        "confirmation_status": "confirmed"
-                    }
-                    appointments.append(appointment)
-                    appointment_counter += 1
-                    appointments_for_day += 1
+                    # Find available time slot for this provider
+                    available_slot = None
+                    for time_slot in time_slots:
+                        # Skip past times if it's today
+                        if current_date.date() == current_time.date():
+                            slot_time = datetime.strptime(time_slot, "%H:%M").time()
+                            if slot_time <= current_time.time():
+                                continue
+                        
+                        # Check if slot is available for this provider
+                        if time_slot not in provider_slots_used[matched_provider['provider_id']]:
+                            available_slot = time_slot
+                            provider_slots_used[matched_provider['provider_id']].add(time_slot)
+                            break
+                    
+                    if available_slot:
+                        appointment = {
+                            "appointment_id": f"A{appointment_counter:03d}",
+                            "patient_id": patient_data['patient_id'],
+                            "provider_id": matched_provider['provider_id'],
+                            "date": current_date.strftime("%Y-%m-%dT") + available_slot + ":00",
+                            "time": available_slot,
+                            "status": "scheduled",
+                            "confirmation_number": f"CONF-{appointment_counter:03d}",
+                            "reassigned": False,
+                            "confirmation_status": "confirmed"
+                        }
+                        appointments.append(appointment)
+                        appointment_counter += 1
+                        appointments_for_day += 1
+                    else:
+                        # No more slots available for this provider, try next patient
+                        break
         
         # Save appointments
         with open(appointments_file, 'w') as f:
