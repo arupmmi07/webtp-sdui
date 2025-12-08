@@ -8,6 +8,11 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 echo "🚀 Starting Healthcare Operations Assistant..."
 echo ""
 
+# Kill any process on port 8000
+echo "🔍 Checking port 8000..."
+lsof -ti:8000 | xargs kill -9 2>/dev/null && echo "✅ Killed existing process on port 8000" || echo "✅ Port 8000 is free"
+echo ""
+
 # Ensure logs directory exists
 mkdir -p "$PROJECT_DIR/logs"
 
