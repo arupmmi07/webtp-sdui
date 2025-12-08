@@ -297,6 +297,30 @@ async def get_schedule_page():
         headers={"Cache-Control": "no-cache"}
     )
 
+@app.get(
+    "/reset.html",
+    response_class=FileResponse,
+    tags=["UI"],
+    summary="Demo Reset Control Page",
+    description="Simple UI to reset demo data"
+)
+async def get_reset_page():
+    """Serve demo reset control page."""
+    static_dir = Path(__file__).parent.parent / "static"
+    reset_file = static_dir / "reset.html"
+    
+    if not reset_file.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"Reset page not found."
+        )
+    
+    return FileResponse(
+        str(reset_file),
+        media_type="text/html",
+        headers={"Cache-Control": "no-cache"}
+    )
+
 # ============================================================
 # Appointments
 # ============================================================

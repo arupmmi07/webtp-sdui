@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔄 Demo Reset Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 8px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+        
+        .btn-secondary:hover {
+            background: #d5dbdb;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .info-box {
+            background: #ebf5fb;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .info-box h3 {
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        
+        .info-box ul {
+            margin-left: 20px;
+            color: #34495e;
+        }
+        
+        .info-box li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Demo Reset Control</h1>
+        <p class="subtitle">Reset appointment data for demo purposes</p>
+        
+        <div class="info-box">
+            <h3>What this does:</h3>
+            <ul>
+                <li>Creates realistic appointments based on patient-provider matching</li>
+                <li>Skips weekends (Saturday & Sunday)</li>
+                <li>Only creates future time slots</li>
+                <li>Clears emails, waitlist, and freed slots</li>
+                <li>Resets all providers to available status</li>
+            </ul>
+        </div>
+        
+        <form id="resetForm">
+            <div class="form-group">
+                <label for="daysAhead">Days Ahead</label>
+                <input type="number" id="daysAhead" name="daysAhead" value="5" min="1" max="14">
+                <small style="color: #7f8c8d;">Number of days to create appointments for (weekdays only)</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="appointmentsPerDay">Appointments Per Day</label>
+                <input type="number" id="appointmentsPerDay" name="appointmentsPerDay" value="3" min="1" max="20">
+                <small style="color: #7f8c8d;">Default: 3 for testing, 10 for demo</small>
+            </div>
+            
+            <div class="button-group">
+                <button type="submit" class="btn-primary">🔄 Reset Demo</button>
+                <button type="button" class="btn-secondary" onclick="window.location.href='/schedule.html'">📅 View Schedule</button>
+            </div>
+        </form>
+        
+        <div id="status" class="status"></div>
+    </div>
+    
+    <script>
+        document.getElementById('resetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const statusDiv = document.getElementById('status');
+            const daysAhead = parseInt(document.getElementById('daysAhead').value);
+            const appointmentsPerDay = parseInt(document.getElementById('appointmentsPerDay').value);
+            
+            // Show loading
+            statusDiv.className = 'status loading';
+            statusDiv.style.display = 'block';
+            statusDiv.textContent = '🔄 Resetting demo data...';
+            
+            try {
+                const response = await fetch('/api/demo/reset', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        days_ahead: daysAhead,
+                        appointments_per_day: appointmentsPerDay
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = `
+                        <strong>✅ Reset Successful!</strong><br>
+                        • ${result.appointments_created} appointments created<br>
+                        • Date range: ${result.date_range.start} to ${result.date_range.end}<br>
+                        • ${result.providers_included} providers included<br>
+                        • ${result.patients_used} patients used<br>
+                        <br>
+                        <a href="/schedule.html" style="color: #155724; text-decoration: underline;">View Schedule →</a>
+                    `;
+                } else {
+                    throw new Error(result.message || 'Reset failed');
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `
+                    <strong>❌ Error</strong><br>
+                    ${error.message}
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
+
