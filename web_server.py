@@ -1,23 +1,103 @@
-"""Simple web server to serve HTML pages for deployment.
+"""Unified web server with HTML pages + API endpoints.
 
-This replaces the complex Streamlit setup with a simple server that just serves HTML files.
-Perfect for deployment where we only need the HTML pages (schedule, emails, reset).
+Combines the web UI and API into a single server for simplified deployment.
+Serves both HTML pages and provides all necessary API endpoints.
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List, Optional, Dict, Any
 import uvicorn
 from pathlib import Path
 import os
+import json
+from datetime import datetime, timedelta
+import random
 
 # Create FastAPI app
 app = FastAPI(
-    title="WebTP Demo UI",
-    description="Simple web server for HTML pages",
-    version="1.0.0"
+    title="WebTP Demo - Unified Server",
+    description="""
+    Unified web server with HTML pages and API endpoints.
+    
+    ## Features
+    - Interactive HTML pages (schedule, emails, reset)
+    - Complete REST API for appointments, providers, patients
+    - Demo data management
+    - Real-time scheduling operations
+    
+    ## Pages
+    - **Schedule**: Interactive appointment calendar
+    - **Emails**: Patient communication viewer
+    - **Reset**: Demo data control panel
+    """,
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
+
+# Data Models
+class TimeSlot(BaseModel):
+    time: str
+    date: Optional[str] = None
+    available: Optional[bool] = True
+
+class Provider(BaseModel):
+    model_config = {"extra": "allow"}
+    
+    provider_id: str
+    name: str
+    specialty: Optional[str] = None
+    gender: Optional[str] = None
+    primary_location: Optional[str] = None
+    zip: Optional[str] = None
+    years_experience: Optional[int] = None
+    experience_level: Optional[str] = None
+    certifications: Optional[List[str]] = []
+    available_days: Optional[List[str]] = []
+    unavailable_dates: Optional[List[str]] = []
+    working_hours_start: Optional[str] = "08:00"
+    working_hours_end: Optional[str] = "17:00"
+    available_slots: Optional[List[TimeSlot]] = []
+    max_patient_capacity: Optional[int] = 50
+    current_patient_load: Optional[int] = 0
+    status: Optional[str] = "active"
+
+class Appointment(BaseModel):
+    model_config = {"extra": "allow"}
+    
+    appointment_id: str
+    patient_id: str
+    provider_id: str
+    date: str
+    time: str
+    status: Optional[str] = "scheduled"
+    confirmation_number: Optional[str] = None
+    confirmation_status: Optional[str] = None
+    reassigned: Optional[bool] = False
+    original_provider_id: Optional[str] = None
+
+class Patient(BaseModel):
+    model_config = {"extra": "allow"}
+    
+    patient_id: str
+    name: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    condition: Optional[str] = None
+    preferred_provider_gender: Optional[str] = None
+    preferred_days: Optional[List[str]] = []
+    max_distance_miles: Optional[float] = None
+
+class DemoResetRequest(BaseModel):
+    days_ahead: int = 5
+    appointments_per_day: int = 3
+
+# Data directory
+DATA_DIR = Path(__file__).parent / "data"
 
 # Add CORS middleware
 app.add_middleware(
@@ -35,6 +115,229 @@ static_dir = current_dir / "static"
 # Mount static files
 if static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+# ============================================================
+# API Endpoints
+# ============================================================
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint."""
+    return {"status": "healthy", "message": "WebTP Demo is running"}
+
+@app.get("/api/appointments", response_model=List[Appointment])
+async def get_appointments(
+    provider_id: Optional[str] = Query(None, description="Filter by provider ID")
+):
+    """Get all appointments, optionally filtered by provider."""
+    try:
+        appointments_file = DATA_DIR / "appointments.json"
+        if not appointments_file.exists():
+            return []
+        
+        with open(appointments_file, 'r') as f:
+            appointments = json.load(f)
+        
+        if provider_id:
+            appointments = [apt for apt in appointments if apt.get('provider_id') == provider_id]
+        
+        return appointments
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading appointments: {str(e)}")
+
+@app.get("/api/providers", response_model=List[Provider])
+async def get_providers():
+    """Get all healthcare providers."""
+    try:
+        providers_file = DATA_DIR / "providers.json"
+        if not providers_file.exists():
+            return []
+        
+        with open(providers_file, 'r') as f:
+            providers = json.load(f)
+        
+        # Remove "Dr." prefix from names for UI consistency
+        for provider in providers:
+            if provider.get('name', '').startswith('Dr. '):
+                provider['name'] = provider['name'][4:]  # Remove "Dr. "
+        
+        return providers
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading providers: {str(e)}")
+
+@app.get("/api/patients", response_model=List[Patient])
+async def get_patients():
+    """Get all patients."""
+    try:
+        patients_file = DATA_DIR / "patients.json"
+        if not patients_file.exists():
+            return []
+        
+        with open(patients_file, 'r') as f:
+            patients = json.load(f)
+        
+        return patients
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading patients: {str(e)}")
+
+@app.get("/api/emails")
+async def get_emails():
+    """Get sent emails."""
+    try:
+        emails_file = DATA_DIR / "emails.json"
+        if not emails_file.exists():
+            return []
+        
+        with open(emails_file, 'r') as f:
+            emails = json.load(f)
+        
+        return emails
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading emails: {str(e)}")
+
+@app.post("/api/demo/reset")
+async def reset_demo_data(request: DemoResetRequest):
+    """Reset demo data with realistic appointments."""
+    try:
+        # File paths
+        appointments_file = DATA_DIR / "appointments.json"
+        providers_file = DATA_DIR / "providers.json"
+        patients_file = DATA_DIR / "patients.json"
+        emails_file = DATA_DIR / "emails.json"
+        waitlist_file = DATA_DIR / "waitlist.json"
+        freed_slots_file = DATA_DIR / "freed_slots.json"
+        seed_file = DATA_DIR / "demo_seed_appointments.json"
+        
+        # Load existing data
+        with open(providers_file, 'r') as f:
+            providers = json.load(f)
+        
+        # Load realistic patient data
+        if seed_file.exists():
+            with open(seed_file, 'r') as f:
+                realistic_patients = json.load(f)
+        else:
+            # Fallback realistic patients
+            realistic_patients = [
+                {"patient_id": "PAT001", "patient_name": "Maria Rodriguez", "condition": "knee pain", "specialty_needed": "Orthopedic Physical Therapy"},
+                {"patient_id": "PAT002", "patient_name": "John Smith", "condition": "sports injury", "specialty_needed": "Sports Physical Therapy"},
+                {"patient_id": "PAT003", "patient_name": "Sarah Johnson", "condition": "back pain", "specialty_needed": "General Physical Therapy"}
+            ]
+        
+        # Generate appointments
+        appointments = []
+        appointment_counter = 1
+        start_date = datetime.now().date()
+        current_time = datetime.now()
+        time_slots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"]
+        
+        # Provider specialty mapping
+        provider_specialty_map = {p['provider_id']: p.get('specialty', '') for p in providers}
+        
+        for day_offset in range(request.days_ahead):
+            current_date = start_date + timedelta(days=day_offset)
+            
+            # Skip weekends
+            if current_date.weekday() >= 5:
+                continue
+            
+            # Track used slots per provider to avoid overlaps
+            provider_slots_used = {p['provider_id']: set() for p in providers}
+            appointments_for_day = 0
+            patient_index = 0
+            
+            while appointments_for_day < request.appointments_per_day:
+                if patient_index >= len(realistic_patients):
+                    patient_index = 0
+                patient_data = realistic_patients[patient_index]
+                patient_index += 1
+                
+                # Skip waitlist patients for regular appointments
+                if patient_data.get('match_type') == 'waitlist':
+                    continue
+                
+                # Match patient to appropriate provider
+                matched_provider = None
+                for provider in providers:
+                    if provider_specialty_map.get(provider['provider_id']) == patient_data.get('specialty_needed'):
+                        matched_provider = provider
+                        break
+                
+                if not matched_provider and providers:
+                    matched_provider = providers[0]
+                
+                if matched_provider:
+                    # Find available time slot
+                    available_slot = None
+                    for time_slot in time_slots:
+                        # Skip past times if it's today
+                        if current_date == current_time.date():
+                            slot_time = datetime.strptime(time_slot, "%H:%M").time()
+                            if slot_time <= current_time.time():
+                                continue
+                        
+                        if time_slot not in provider_slots_used[matched_provider['provider_id']]:
+                            available_slot = time_slot
+                            provider_slots_used[matched_provider['provider_id']].add(time_slot)
+                            break
+                    
+                    if available_slot:
+                        appointment = {
+                            "appointment_id": f"A{appointment_counter:03d}",
+                            "patient_id": patient_data['patient_id'],
+                            "provider_id": matched_provider['provider_id'],
+                            "date": current_date.strftime("%Y-%m-%dT") + available_slot + ":00",
+                            "time": available_slot,
+                            "status": "scheduled",
+                            "confirmation_number": f"CONF-{appointment_counter:03d}",
+                            "reassigned": False,
+                            "confirmation_status": "confirmed"
+                        }
+                        appointments.append(appointment)
+                        appointment_counter += 1
+                        appointments_for_day += 1
+                    else:
+                        break
+        
+        # Save all data
+        with open(appointments_file, 'w') as f:
+            json.dump(appointments, f, indent=2)
+        
+        with open(emails_file, 'w') as f:
+            json.dump([], f, indent=2)
+        
+        with open(waitlist_file, 'w') as f:
+            json.dump([], f, indent=2)
+        
+        with open(freed_slots_file, 'w') as f:
+            json.dump([], f, indent=2)
+        
+        # Reset provider status
+        for provider in providers:
+            provider['unavailable_dates'] = []
+            provider['status'] = 'active'
+        with open(providers_file, 'w') as f:
+            json.dump(providers, f, indent=2)
+        
+        return {
+            "success": True,
+            "message": "Demo data reset successfully",
+            "appointments_created": len(appointments),
+            "date_range": {
+                "start": start_date.strftime("%Y-%m-%d"),
+                "end": (start_date + timedelta(days=request.days_ahead - 1)).strftime("%Y-%m-%d")
+            },
+            "providers_included": len(providers),
+            "patients_used": len(realistic_patients),
+            "appointments_per_day": request.appointments_per_day
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error resetting demo data: {str(e)}")
+
+# ============================================================
+# HTML Pages
+# ============================================================
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
