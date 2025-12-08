@@ -11,16 +11,23 @@ echo ""
 # Ensure logs directory exists
 mkdir -p "$PROJECT_DIR/logs"
 
-# Export LiteLLM environment variables for LM Studio
-export LITELLM_BASE_URL="http://localhost:1234/v1"
-export LITELLM_API_KEY="lm-studio"
+# Export LiteLLM environment variables
+# Option 1: Direct to LM Studio (faster, no logs)
+# export LITELLM_BASE_URL="http://localhost:1234/v1"
+# export LITELLM_API_KEY="lm-studio"
+
+# Option 2: Through LiteLLM Proxy (slower, but shows logs for demo)
+export LITELLM_BASE_URL="http://localhost:4000"
+export LITELLM_API_KEY="sk-1234"
+
 export LITELLM_DEFAULT_MODEL="openai/gpt-oss-20b"
 export USE_MOCK_LLM="false"
 
 echo "🤖 LLM Configuration:"
-echo "   Provider: LM Studio (Local)"
+echo "   Provider: LiteLLM Proxy → LM Studio"
 echo "   Model: ${LITELLM_DEFAULT_MODEL}"
 echo "   API: ${LITELLM_BASE_URL}"
+echo "   💡 Traffic routed through proxy for demo monitoring"
 echo ""
 
 # Start LiteLLM proxy in Docker for demo UI

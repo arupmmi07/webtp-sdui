@@ -1,0 +1,61 @@
+# Cursor AI Rules for This Project
+
+## File Creation Policy
+
+### ❌ DO NOT Create These Files Unless Explicitly Asked:
+- **Documentation files** (*.md, *.txt, README files)
+- **Configuration files** (*.yaml, *.json config files)
+- **Example files** or sample files
+- **Template files**
+- **Guide files** or tutorial files
+
+### ✅ DO Create These Files When Needed:
+- **Source code** (*.py, *.js, etc.) when implementing features
+- **Test files** when writing tests
+- **Data files** when explicitly requested
+
+## Documentation Rules
+
+1. **Never proactively create documentation** - only create when user explicitly asks
+2. **Update existing docs** instead of creating new ones when possible
+3. **Ask first** if documentation is needed rather than assuming
+4. **No README files** unless specifically requested
+
+## Code Changes
+
+1. **Always prefer editing existing files** over creating new ones
+2. **Focus on implementation** not documentation
+3. **Keep it minimal** - only create what's necessary
+4. **Ask for clarification** if unsure whether to create a file
+
+## Examples
+
+### ❌ Bad (Don't Do This)
+```
+User: "Add a new feature for X"
+AI: *Creates feature.py, feature_test.py, FEATURE_GUIDE.md, FEATURE_README.md*
+```
+
+### ✅ Good (Do This)
+```
+User: "Add a new feature for X"
+AI: *Creates feature.py, feature_test.py only*
+```
+
+### ✅ Good (Ask First)
+```
+User: "Add a new feature for X"
+AI: "I'll create feature.py and feature_test.py. Would you like documentation as well?"
+```
+
+## Project-Specific Notes
+
+- This is a **configuration-driven architecture** - check config files before creating new ones
+- All project management files go in `dev/` folder (already in .gitignore)
+- Focus on **shipping code**, not creating documentation
+- Documentation should be **minimal and intentional**
+
+## Summary
+
+**Default behavior**: Create only code files needed for implementation. Never create markdown/documentation files unless explicitly requested by the user.
+

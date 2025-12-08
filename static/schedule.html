@@ -1160,7 +1160,7 @@
                             <div style="display: flex; align-items: center; padding: 12px; border: 2px solid #ecf0f1; border-radius: 6px; background: white; cursor: not-allowed; opacity: 0.9;">
                                 <div style="margin-right: 10px; width: 18px; height: 18px; border: 2px solid #bdc3c7; border-radius: 50%;"></div>
                                 <div style="flex: 1;">
-                                    <div style="font-weight: 500; color: #34495e;">👋 Doctor has left the organization</div>
+                                    <div style="font-weight: 500; color: #34495e;">👋 Provider has left the organization</div>
                                     <div style="color: #7f8c8d; font-size: 12px; margin-top: 2px;">All future appointments will be automatically rescheduled</div>
                                 </div>
                             </div>
@@ -1406,7 +1406,7 @@
                 
                 const tooltip = `
                     <div class="provider-tooltip">
-                        <div class="provider-tooltip-title">👨‍⚕️ ${provider.name}</div>
+                        <div class="provider-tooltip-title">${provider.name} PT</div>
                         
                         <div class="provider-tooltip-section">
                             <div class="provider-tooltip-label">Experience</div>
@@ -1472,7 +1472,7 @@
                 
                 html += `
                     <div class="${headerClass}">
-                        👨‍⚕️ ${provider.name} ${badge}
+                        ${provider.name} PT ${badge}
                         ${actionButton}
                         <div class="provider-specialty">${provider.specialty}</div>
                         ${tooltip}

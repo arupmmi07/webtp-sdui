@@ -55,6 +55,10 @@ class PatientEngagementAgent:
         domain_server: JSONDomainServer = None
     ):
         """Initialize agent with service dependencies."""
+        # Counter for AI-generated emails (limit to first 2 for demo speed)
+        self.ai_email_count = 0
+        self.max_ai_emails = 2  # Only generate AI for first 2 emails
+        
         # Determine which LLM to use
         use_mock = os.getenv("USE_MOCK_LLM", "false").lower() == "true"
         
@@ -161,12 +165,19 @@ class PatientEngagementAgent:
         accept_url = f"http://localhost:8000/api/patient-response?token={token}&response=accept"
         decline_url = f"http://localhost:8000/api/patient-response?token={token}&response=decline"
         
-        # Send BOTH AI and Template versions (parallel, to avoid delay)
+        # Send email(s) - AI for first 2, then template only
         print(f"[{channel.upper()} MOCK] Sending to {contact_info}")
         
-        # 1. Generate AI message (if enabled)
+        # 1. Generate AI message (only for first 2 emails for demo speed)
         ai_message = None
-        if self.use_langfuse_prompt and self.langfuse and self.llm:
+        should_generate_ai = (
+            self.use_langfuse_prompt and 
+            self.langfuse and 
+            self.llm and 
+            self.ai_email_count < self.max_ai_emails
+        )
+        
+        if should_generate_ai:
             try:
                 ai_message = self._compose_offer_message(
                     patient=patient,
@@ -178,7 +189,7 @@ class PatientEngagementAgent:
                 )
                 # Don't add links - buttons are displayed separately in emails.html
                 
-                print(f"[{channel.upper()} MOCK] 🤖 AI Message:\n{ai_message}")
+                print(f"[{channel.upper()} MOCK] 🤖 AI Message ({self.ai_email_count + 1}/{self.max_ai_emails}):\n{ai_message}")
                 
                 # Save AI email (message without links - buttons handled separately)
                 self._save_email({
@@ -200,8 +211,13 @@ class PatientEngagementAgent:
                     "sent_at": __import__('datetime').datetime.now().isoformat()
                 })
                 
+                self.ai_email_count += 1  # Increment counter
+                
             except Exception as e:
                 print(f"[EMAIL] Warning: AI message generation failed: {e}")
+        else:
+            if self.ai_email_count >= self.max_ai_emails:
+                print(f"[{channel.upper()} MOCK] ⏩ Skipping AI generation (limit reached: {self.max_ai_emails}), using template only")
         
         # 2. Generate Template message (always)
         template_message = self._compose_offer_message(

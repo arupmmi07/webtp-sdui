@@ -62,3 +62,6 @@ dmypy.json
 temp/
 scratch/
 
+# Development files (docs, tests, prompts)
+dev/
+
