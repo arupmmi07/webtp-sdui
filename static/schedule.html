@@ -1369,10 +1369,10 @@
             // ALWAYS show ALL providers, regardless of whether they have appointments
             const displayProviders = providers.sort((a, b) => a.name.localeCompare(b.name));
 
-            let html = '<div class="calendar-grid">';
+            // Providers label row (full width, outside grid)
+            let html = `<div style="text-align: center; font-weight: 700; font-size: 18px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px 8px 0 0; margin-bottom: 0;">Providers</div>`;
             
-            // Providers label row (full width)
-            html += `<div style="grid-column: 1 / -1; text-align: center; font-weight: 700; font-size: 18px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px 8px 0 0; margin-bottom: 10px;">Providers</div>`;
+            html += '<div class="calendar-grid">';
             
             // Header row with provider names
             html += '<div class="calendar-header">';
