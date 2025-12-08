@@ -45,6 +45,17 @@ if (!(Test-Path "logs")) {
     New-Item -ItemType Directory -Path "logs" | Out-Null
 }
 
+# Kill any process on port 8000
+Write-Host "`nChecking port 8000..." -ForegroundColor Yellow
+$port8000 = Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue
+if ($port8000) {
+    $processId = $port8000.OwningProcess
+    Stop-Process -Id $processId -Force
+    Write-Host "✅ Killed existing process on port 8000 (PID: $processId)" -ForegroundColor Green
+} else {
+    Write-Host "✅ Port 8000 is free" -ForegroundColor Green
+}
+
 # Start API server
 Write-Host "`nStarting API server on port 8000..." -ForegroundColor Yellow
 Start-Process python -ArgumentList "api/server.py" -NoNewWindow -RedirectStandardOutput "logs/api.log" -RedirectStandardError "logs/api_error.log"
