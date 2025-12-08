@@ -430,6 +430,23 @@ IMPORTANT RULES:
 4. Use Tier 2 preferences only to rank among providers that meet Tier 1 requirements
 5. Provide clear reasoning explaining Tier 1 pass/fail and Tier 2 ranking
 
+CONTINUITY & RESCHEDULING RULES:
+1. **Short unavailability (1-2 days)**: PREFER rescheduling with the SAME provider on a different available date
+   - Check if the original provider has available slots within the next 7 days
+   - If yes, reschedule to maintain continuity of care
+   - Send email: "Your appointment has been rescheduled to [new date] with the same provider"
+   
+2. **Extended unavailability (3+ days)**: Reassign to a DIFFERENT provider based on specialty matching
+   - Original provider unavailable for extended period
+   - Match patient to best alternative provider using Tier 1 & Tier 2 criteria
+   - Send email: "Your provider is unavailable. We've matched you with [new provider name]"
+
+3. **Weekend/Holiday handling**: 
+   - Providers do NOT work on Saturdays and Sundays
+   - NEVER schedule appointments on weekends
+   - If unavailability spans a weekend, skip Sat/Sun when counting days
+   - Only consider weekday slots (Monday-Friday) for rescheduling
+
 OUTPUT FORMAT (JSON):
 For each patient, provide your autonomous decision with reasoning:
 
