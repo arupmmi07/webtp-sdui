@@ -1024,6 +1024,7 @@ class DemoResetRequest(BaseModel):
     start_date: Optional[str] = None  # YYYY-MM-DD, defaults to today
     days_ahead: int = 7  # Number of days to create appointments for
     providers: Optional[List[str]] = None  # List of provider IDs, defaults to all
+    appointments_per_day: int = 3  # Number of appointments to create per day (default 3 for testing)
 
 @app.post(
     "/api/demo/reset",
@@ -1052,7 +1053,7 @@ async def reset_demo(request: DemoResetRequest):
         
         # Load data files
         providers_file = DATA_DIR / "providers.json"
-        patients_file = DATA_DIR / "patients.json"
+        seed_file = DATA_DIR / "demo_seed_appointments.json"
         appointments_file = DATA_DIR / "appointments.json"
         emails_file = DATA_DIR / "emails.json"
         waitlist_file = DATA_DIR / "waitlist.json"
@@ -1060,8 +1061,11 @@ async def reset_demo(request: DemoResetRequest):
         
         with open(providers_file, 'r') as f:
             providers = json.load(f)
-        with open(patients_file, 'r') as f:
-            patients = json.load(f)
+        with open(seed_file, 'r') as f:
+            seed_data = json.load(f)
+        
+        realistic_patients = seed_data['realistic_appointments']
+        provider_specialty_map = seed_data['provider_specialty_mapping']
         
         # Filter providers if specified
         if request.providers:
@@ -1073,11 +1077,11 @@ async def reset_demo(request: DemoResetRequest):
             "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"
         ]
         
-        # Generate appointments
+        # Generate appointments using realistic patient-provider matching
         appointments = []
         appointment_counter = 1
-        patient_index = 0
         current_time = datetime.now()
+        appointments_created_today = 0
         
         for day_offset in range(request.days_ahead):
             current_date = start_date + timedelta(days=day_offset)
@@ -1086,33 +1090,46 @@ async def reset_demo(request: DemoResetRequest):
             if current_date.weekday() >= 5:
                 continue
             
-            # For each provider
-            for provider in providers:
-                # Skip if provider not available on this day
-                day_name = current_date.strftime("%A")
-                if day_name not in provider.get('available_days', []):
+            appointments_for_day = 0
+            patient_index = 0
+            
+            # Create specified number of appointments per day
+            for time_slot in time_slots:
+                if appointments_for_day >= request.appointments_per_day:
+                    break
+                    
+                # Skip past times if it's today
+                if current_date.date() == current_time.date():
+                    slot_time = datetime.strptime(time_slot, "%H:%M").time()
+                    if slot_time <= current_time.time():
+                        continue
+                
+                # Get patient (cycle through realistic patients)
+                if patient_index >= len(realistic_patients):
+                    patient_index = 0
+                patient_data = realistic_patients[patient_index]
+                patient_index += 1
+                
+                # Skip waitlist patients for regular appointments
+                if patient_data['match_type'] == 'waitlist':
                     continue
                 
-                # For each time slot
-                for time_slot in time_slots:
-                    # Skip past times if it's today
-                    if current_date.date() == current_time.date():
-                        slot_time = datetime.strptime(time_slot, "%H:%M").time()
-                        if slot_time <= current_time.time():
-                            continue
-                    
-                    # Assign patient (cycle through patients)
-                    if patient_index >= len(patients):
-                        patient_index = 0  # Wrap around
-                    
-                    patient = patients[patient_index]
-                    patient_index += 1
-                    
-                    # Create appointment
+                # Match patient to appropriate provider based on specialty
+                matched_provider = None
+                for provider in providers:
+                    if provider_specialty_map.get(provider['provider_id']) == patient_data['specialty_needed']:
+                        matched_provider = provider
+                        break
+                
+                # If no perfect match, use first available provider
+                if not matched_provider and providers:
+                    matched_provider = providers[0]
+                
+                if matched_provider:
                     appointment = {
                         "appointment_id": f"A{appointment_counter:03d}",
-                        "patient_id": patient['patient_id'],
-                        "provider_id": provider['provider_id'],
+                        "patient_id": patient_data['patient_id'],
+                        "provider_id": matched_provider['provider_id'],
                         "date": current_date.strftime("%Y-%m-%dT") + time_slot + ":00",
                         "time": time_slot,
                         "status": "scheduled",
@@ -1122,6 +1139,7 @@ async def reset_demo(request: DemoResetRequest):
                     }
                     appointments.append(appointment)
                     appointment_counter += 1
+                    appointments_for_day += 1
         
         # Save appointments
         with open(appointments_file, 'w') as f:

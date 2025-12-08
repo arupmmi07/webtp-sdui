@@ -1,0 +1,114 @@
+{
+  "realistic_appointments": [
+    {
+      "patient_id": "PAT001",
+      "patient_name": "Maria Rodriguez",
+      "condition": "post-surgical knee",
+      "specialty_needed": "Orthopedic Physical Therapy",
+      "preferred_provider_gender": "female",
+      "preferred_time": "morning",
+      "match_type": "perfect",
+      "notes": "Perfect match - needs orthopedic PT, prefers female provider"
+    },
+    {
+      "patient_id": "PAT002",
+      "patient_name": "John Davis",
+      "condition": "lower back pain",
+      "specialty_needed": "Orthopedic Physical Therapy",
+      "preferred_provider_gender": "any",
+      "preferred_time": "afternoon",
+      "match_type": "good",
+      "notes": "Good match - orthopedic need, flexible on provider"
+    },
+    {
+      "patient_id": "PAT003",
+      "patient_name": "Emily Chen",
+      "condition": "sports injury - shoulder",
+      "specialty_needed": "Sports Physical Therapy",
+      "preferred_provider_gender": "any",
+      "preferred_time": "morning",
+      "match_type": "perfect",
+      "notes": "Perfect match - sports injury needs sports PT specialist"
+    },
+    {
+      "patient_id": "PAT004",
+      "patient_name": "Robert Thompson",
+      "condition": "chronic pain management",
+      "specialty_needed": "Acupuncture & Manual Therapy",
+      "preferred_provider_gender": "male",
+      "preferred_time": "afternoon",
+      "match_type": "good",
+      "notes": "Good match - needs manual therapy and acupuncture"
+    },
+    {
+      "patient_id": "PAT005",
+      "patient_name": "Margaret Wilson",
+      "condition": "balance issues - elderly",
+      "specialty_needed": "Geriatric Physical Therapy",
+      "preferred_provider_gender": "any",
+      "preferred_time": "morning",
+      "match_type": "perfect",
+      "notes": "Perfect match - elderly patient needs geriatric specialist"
+    },
+    {
+      "patient_id": "PAT006",
+      "patient_name": "David Kim",
+      "condition": "ACL reconstruction rehab",
+      "specialty_needed": "Sports Medicine Physical Therapy",
+      "preferred_provider_gender": "any",
+      "preferred_time": "afternoon",
+      "match_type": "perfect",
+      "notes": "Perfect match - post-surgical sports injury"
+    },
+    {
+      "patient_id": "PAT007",
+      "patient_name": "Lisa Anderson",
+      "condition": "hip replacement recovery",
+      "specialty_needed": "Orthopedic Physical Therapy",
+      "preferred_provider_gender": "female",
+      "preferred_time": "morning",
+      "match_type": "good",
+      "notes": "Good match - post-surgical orthopedic care"
+    },
+    {
+      "patient_id": "PAT008",
+      "patient_name": "James Martinez",
+      "condition": "rotator cuff injury",
+      "specialty_needed": "Sports Physical Therapy",
+      "preferred_provider_gender": "male",
+      "preferred_time": "afternoon",
+      "match_type": "good",
+      "notes": "Good match - sports-related shoulder injury"
+    },
+    {
+      "patient_id": "PAT009",
+      "patient_name": "Sarah Johnson",
+      "condition": "neck pain - desk work",
+      "specialty_needed": "Manual Therapy",
+      "preferred_provider_gender": "any",
+      "preferred_time": "morning",
+      "match_type": "fair",
+      "notes": "Fair match - needs manual therapy, multiple options available"
+    },
+    {
+      "patient_id": "PAT_LOWMATCH",
+      "patient_name": "David Rodriguez",
+      "condition": "complex post-surgical case",
+      "specialty_needed": "Specialized Orthopedic + Pain Management",
+      "preferred_provider_gender": "male",
+      "preferred_time": "evening",
+      "match_type": "waitlist",
+      "notes": "WAITLIST CASE - Complex needs, limited availability, specific requirements not met by current providers"
+    }
+  ],
+  "provider_specialty_mapping": {
+    "T001": "Orthopedic Physical Therapy",
+    "T002": "Sports Physical Therapy",
+    "T003": "Acupuncture & Manual Therapy",
+    "T004": "Geriatric Physical Therapy",
+    "T005": "Orthopedic Physical Therapy",
+    "T006": "Sports Medicine Physical Therapy"
+  },
+  "default_appointments_per_day": 3
+}
+
