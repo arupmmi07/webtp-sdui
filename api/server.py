@@ -1113,6 +1113,10 @@ async def reset_demo(request: DemoResetRequest):
         appointment_counter = 1
         current_time = datetime.now()
         
+        # Track used patients globally to avoid duplicates across days
+        used_patients = set()
+        available_patients = [p for p in realistic_patients if p.get('match_type') != 'waitlist']
+        
         for day_offset in range(request.days_ahead):
             current_date = start_date + timedelta(days=day_offset)
             
@@ -1123,19 +1127,21 @@ async def reset_demo(request: DemoResetRequest):
             # Track used slots per provider to avoid overlaps
             provider_slots_used = {p['provider_id']: set() for p in providers}
             appointments_for_day = 0
-            patient_index = 0
             
-            # Create specified number of appointments per day
-            while appointments_for_day < request.appointments_per_day:
-                # Get patient (cycle through realistic patients)
-                if patient_index >= len(realistic_patients):
-                    patient_index = 0
-                patient_data = realistic_patients[patient_index]
-                patient_index += 1
-                
-                # Skip waitlist patients for regular appointments
-                if patient_data['match_type'] == 'waitlist':
-                    continue
+            # Get patients for this day - ONLY use unique patients (never reuse across days)
+            day_patients = []
+            
+            # Only get unique patients (not used on any previous day)
+            for patient_data in available_patients:
+                if patient_data['patient_id'] not in used_patients and len(day_patients) < request.appointments_per_day:
+                    day_patients.append(patient_data)
+                    used_patients.add(patient_data['patient_id'])
+            
+            # If we don't have enough unique patients left, limit appointments for this day
+            # This ensures we NEVER reuse patients across days
+            
+            # Create appointments for selected patients
+            for patient_data in day_patients:
                 
                 # Match patient to appropriate provider based on specialty
                 matched_provider = None
@@ -1179,9 +1185,6 @@ async def reset_demo(request: DemoResetRequest):
                         appointments.append(appointment)
                         appointment_counter += 1
                         appointments_for_day += 1
-                    else:
-                        # No more slots available for this provider, try next patient
-                        break
         
         # Save appointments
         with open(appointments_file, 'w') as f:

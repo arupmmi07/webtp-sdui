@@ -1649,25 +1649,17 @@ async def reset_demo_data(request_obj: DemoResetRequest):
             provider_slots_used = {p['provider_id']: set() for p in providers}
             appointments_for_day = 0
             
-            # Get patients for this day - prioritize unique patients first
+            # Get patients for this day - ONLY use unique patients (never reuse across days)
             day_patients = []
             
-            # First, try to get unique patients (not used on any previous day)
+            # Only get unique patients (not used on any previous day)
             for patient_data in available_patients:
                 if patient_data['patient_id'] not in used_patients and len(day_patients) < request_obj.appointments_per_day:
                     day_patients.append(patient_data)
                     used_patients.add(patient_data['patient_id'])
             
-            # If we need more patients, reuse from the beginning (but still avoid same-day duplicates)
-            if len(day_patients) < request_obj.appointments_per_day:
-                remaining_needed = request_obj.appointments_per_day - len(day_patients)
-                patient_cycle_index = 0
-                while len(day_patients) < request_obj.appointments_per_day and patient_cycle_index < len(available_patients):
-                    patient_data = available_patients[patient_cycle_index]
-                    # Avoid duplicates within the same day
-                    if not any(p['patient_id'] == patient_data['patient_id'] for p in day_patients):
-                        day_patients.append(patient_data)
-                    patient_cycle_index += 1
+            # If we don't have enough unique patients left, limit appointments for this day
+            # This ensures we NEVER reuse patients across days
             
             for patient_data in day_patients:
                 
