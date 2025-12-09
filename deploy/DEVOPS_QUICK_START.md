@@ -29,18 +29,18 @@ Mount volume: `/app/data` - Contains JSON databases
 
 ```bash
 # 1. Build image
-docker build -t webtp-demo .
+docker build -t webpt-demo .
 
 # 2. Run with environment variables
 docker run -d \
-  --name webtp-demo \
+  --name webpt-demo \
   -p 8000:8000 \
   -p 8501:8501 \
   -e AZURE_API_KEY=your-key \
   -e AZURE_API_BASE=your-base-url \
   -e AZURE_DEPLOYMENT_NAME=your-deployment \
   -v $(pwd)/data:/app/data \
-  webtp-demo
+  webpt-demo
 
 # 3. Check health
 curl http://localhost:8000/health
@@ -117,7 +117,7 @@ curl http://localhost:8000/api/providers
 ## 📞 Support
 
 If deployment fails, check:
-1. `docker logs webtp-demo` (if using Docker)
+1. `docker logs webpt-demo` (if using Docker)
 2. Environment variables are set
 3. Ports 8000/8501 are not in use
 

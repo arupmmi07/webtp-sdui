@@ -2,7 +2,7 @@
 
 ## Pre-Deployment (5 minutes)
 
-- [ ] **Create GitHub repository**: `webtp-demo` at https://github.com/madhan-here-now/webtp-demo
+- [ ] **Create GitHub repository**: `webpt-demo` at https://github.com/madhan-here-now/webpt-demo
 - [ ] **Get Azure OpenAI credentials**:
   - [ ] AZURE_API_KEY
   - [ ] AZURE_API_BASE (e.g., https://your-instance.openai.azure.com/)
@@ -12,7 +12,7 @@
 ## Deployment Steps (10 minutes)
 
 ### Option 1: Docker (Recommended)
-- [ ] Build image: `docker build -t webtp-demo .`
+- [ ] Build image: `docker build -t webpt-demo .`
 - [ ] Create `.env` file with Azure credentials
 - [ ] Run: `docker-compose -f deploy/docker-compose.production.yml up -d`
 - [ ] Verify health: `curl http://localhost:8000/health`
@@ -90,7 +90,7 @@ echo $AZURE_API_KEY
 echo $AZURE_API_BASE
 
 # Check .env file is loaded (Docker)
-docker exec webtp-demo-api env | grep AZURE
+docker exec webpt-demo-api env | grep AZURE
 ```
 
 ### Issue: "No data showing"
@@ -99,7 +99,7 @@ docker exec webtp-demo-api env | grep AZURE
 ls -la data/*.json
 
 # Verify volume mount (Docker)
-docker exec webtp-demo-api ls -la /app/data/
+docker exec webpt-demo-api ls -la /app/data/
 ```
 
 ## Production Checklist
@@ -115,7 +115,7 @@ docker exec webtp-demo-api ls -la /app/data/
 ## Support Contact
 
 If deployment fails or issues arise:
-1. Check Docker logs: `docker logs webtp-demo-api`
+1. Check Docker logs: `docker logs webpt-demo-api`
 2. Check application logs in `logs/` directory
 3. Verify all environment variables are set correctly
 4. Ensure Azure OpenAI endpoint is accessible from server
