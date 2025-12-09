@@ -4,7 +4,7 @@ import os
 
 # Base URL configuration
 # Set APP_BASE_URL environment variable when deploying to Azure
-# Example: https://webtp-demo.azurewebsites.net
+# Example: https://webpt-demo.azurewebsites.net
 BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:8000")
 
 # API endpoints

@@ -29,7 +29,7 @@ def main():
     """Main entry point - runs the web server instead of Streamlit."""
     port = int(os.getenv("PORT", 8501))  # Use 8501 to match Streamlit default
     
-    print("🌐 Starting WebTP Demo UI (HTML Server)")
+    print("🌐 Starting WebPT Demo UI (HTML Server)")
     print("=" * 50)
     print(f"📱 Access at: http://localhost:{port}")
     print(f"📅 Schedule: http://localhost:{port}/schedule.html")

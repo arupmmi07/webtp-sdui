@@ -1,6 +1,6 @@
 # Windows PowerShell deployment script for GCP VMs
 
-Write-Host "🚀 Deploying WebTP Demo on Windows..." -ForegroundColor Green
+Write-Host "🚀 Deploying WebPT Demo on Windows..." -ForegroundColor Green
 
 # Check Python
 Write-Host "`nChecking Python..." -ForegroundColor Yellow

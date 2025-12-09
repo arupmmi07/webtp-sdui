@@ -3,7 +3,7 @@
 
 set -e
 
-echo "🚀 Deploying WebTP Demo..."
+echo "🚀 Deploying WebPT Demo..."
 
 # Install Python dependencies
 pip install -r requirements.txt

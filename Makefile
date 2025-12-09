@@ -151,7 +151,7 @@ dev: ## Start unified server (HTML pages + API endpoints)
 		exit 1; \
 	fi
 	@mkdir -p logs
-	@echo "🚀 Starting WebTP Demo - Unified Server"
+	@echo "🚀 Starting WebPT Demo - Unified Server"
 	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 	@echo ""
 	@echo "🔍 Checking for port conflicts..."

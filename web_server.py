@@ -56,7 +56,7 @@ SESSION_SECRET = os.getenv("SESSION_SECRET", secrets.token_urlsafe(32))
 
 # Create FastAPI app
 app = FastAPI(
-    title="WebTP Demo - Unified Server",
+    title="WebPT Demo - Unified Server",
     description="""
     Unified web server with HTML pages and API endpoints.
     
@@ -184,7 +184,7 @@ async def login_page():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Demo Access - WebTP</title>
+        <title>Demo Access - WebPT</title>
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body {
@@ -261,7 +261,7 @@ async def login_page():
     </head>
     <body>
         <div class="login-container">
-            <h1>🏥 WebTP Demo</h1>
+            <h1>🏥 WebPT Demo</h1>
             <p class="subtitle">Enter password to access demo</p>
             
             <form method="post" action="/login">
@@ -309,7 +309,7 @@ async def logout(request: Request):
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
-    return {"status": "healthy", "message": "WebTP Demo is running"}
+    return {"status": "healthy", "message": "WebPT Demo is running"}
 
 @app.get("/confirm")
 async def confirm_appointment(token: str, action: str = "accept"):
@@ -1765,7 +1765,7 @@ async def root(request: Request):
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>WebTP Demo - Index</title>
+        <title>WebPT Demo - Index</title>
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body {
@@ -1873,7 +1873,7 @@ async def root(request: Request):
     </head>
     <body>
         <div class="container">
-            <h1>🏥 WebTP Demo Index</h1>
+            <h1>🏥 WebPT Demo Index</h1>
             <p class="subtitle">Complete directory of all available pages and endpoints</p>
             
             <!-- Main UI Pages -->
@@ -2014,7 +2014,7 @@ async def root(request: Request):
             </div>
             
             <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #ecf0f1; color: #7f8c8d;">
-                <p>🚀 WebTP Demo - Physical Therapy Scheduling & AI Assistant</p>
+                <p>🚀 WebPT Demo - Physical Therapy Scheduling & AI Assistant</p>
                 <p style="font-size: 0.9rem; margin-top: 5px;">All endpoints are live and ready for testing</p>
                 <p style="margin-top: 15px;">
                     <a href="/logout" style="color: #e74c3c; text-decoration: none; font-size: 0.9rem;">🚪 Logout</a>
@@ -2059,11 +2059,11 @@ async def get_reset(request: Request, admin_key: str = None, _: bool = Depends(r
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
-    return {"status": "healthy", "message": "WebTP Demo UI is running"}
+    return {"status": "healthy", "message": "WebPT Demo UI is running"}
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
-    print(f"🌐 Starting WebTP Demo UI on port {port}")
+    print(f"🌐 Starting WebPT Demo UI on port {port}")
     print(f"📱 Access at: http://localhost:{port}")
     
     uvicorn.run(
