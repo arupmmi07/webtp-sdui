@@ -169,19 +169,19 @@
         <form id="resetForm">
             <div class="form-group">
                 <label for="daysAhead">Days Ahead</label>
-                <input type="number" id="daysAhead" name="daysAhead" value="5" min="1" max="14">
+                <input type="number" id="daysAhead" name="daysAhead" value="4" min="1" max="14">
                 <small style="color: #7f8c8d;">Number of days to create appointments for (weekdays only)</small>
             </div>
             
             <div class="form-group">
                 <label for="appointmentsPerDay">Appointments Per Day</label>
-                <input type="number" id="appointmentsPerDay" name="appointmentsPerDay" value="3" min="1" max="20">
-                <small style="color: #7f8c8d;">Default: 3 for testing, 10 for demo</small>
+                <input type="number" id="appointmentsPerDay" name="appointmentsPerDay" value="7" min="1" max="20">
+                <small style="color: #7f8c8d;">Default: 7 for demo, adjust as needed</small>
             </div>
             
             <div class="button-group">
                 <button type="submit" class="btn-primary">🔄 Reset Demo</button>
-                <button type="button" class="btn-secondary" onclick="window.location.href='/schedule.html'">📅 View Schedule</button>
+                <button type="button" class="btn-secondary" onclick="window.open('/schedule.html', '_blank')">📅 View Schedule</button>
             </div>
         </form>
         

@@ -5,7 +5,7 @@
     "specialty": "Orthopedic Physical Therapy",
     "gender": "female",
     "status": "active",
-    "primary_location": "Metro PT Downtown",
+    "primary_location": "Renew Physical Therapy",
     "zip": "12340",
     "certifications": [
       "Orthopedic Clinical Specialist (OCS)",
@@ -18,11 +18,7 @@
       "Thursday",
       "Friday"
     ],
-    "unavailable_dates": [
-      "2025-12-08",
-      "2025-12-09",
-      "2025-12-10"
-    ],
+    "unavailable_dates": [],
     "working_hours_start": "08:00",
     "working_hours_end": "17:00",
     "current_patient_load": 0,
@@ -32,33 +28,7 @@
     "role": "Head of Department",
     "years_experience": 15,
     "experience_level": "expert",
-    "available_slots": [
-      {
-        "date": "2025-12-09",
-        "time": "09:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-09",
-        "time": "10:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-09",
-        "time": "14:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-10",
-        "time": "09:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-10",
-        "time": "10:00",
-        "available": true
-      }
-    ]
+    "available_slots": []
   },
   {
     "provider_id": "P001",
@@ -66,8 +36,8 @@
     "specialty": "Sports Physical Therapy",
     "gender": "female",
     "status": "active",
-    "primary_location": "Metro PT Main Clinic",
-    "zip": "12345",
+    "primary_location": "Renew Physical Therapy",
+    "zip": "12340",
     "certifications": [
       "Sports Clinical Specialist (SCS)",
       "Dry Needling Certified"
@@ -89,28 +59,7 @@
     "role": "Staff Therapist",
     "years_experience": 10,
     "experience_level": "senior",
-    "available_slots": [
-      {
-        "date": "2025-12-08",
-        "time": "09:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "10:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "14:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "15:00",
-        "available": true
-      }
-    ]
+    "available_slots": []
   },
   {
     "provider_id": "P003",
@@ -118,8 +67,8 @@
     "specialty": "Acupuncture & Manual Therapy",
     "gender": "male",
     "status": "active",
-    "primary_location": "Metro PT Westside",
-    "zip": "12350",
+    "primary_location": "Renew Physical Therapy",
+    "zip": "12340",
     "certifications": [
       "Licensed Acupuncturist",
       "Manual Therapy Certified",
@@ -142,84 +91,7 @@
     "role": "Staff Therapist",
     "years_experience": 12,
     "experience_level": "senior",
-    "available_slots": [
-      {
-        "date": "2025-12-08",
-        "time": "09:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "10:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "14:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "15:00",
-        "available": true
-      }
-    ]
-  },
-  {
-    "provider_id": "P004",
-    "name": "Michael Lee",
-    "specialty": "Geriatric Physical Therapy",
-    "gender": "male",
-    "status": "active",
-    "primary_location": "Metro PT Main Clinic",
-    "zip": "12345",
-    "certifications": [
-      "Geriatric Clinical Specialist (GCS)",
-      "Balance & Fall Prevention"
-    ],
-    "available_days": [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday"
-    ],
-    "unavailable_dates": [
-      "2025-12-10",
-      "2025-12-11",
-      "2025-12-12"
-    ],
-    "working_hours_start": "08:00",
-    "working_hours_end": "16:00",
-    "current_patient_load": 0,
-    "max_patient_capacity": 25,
-    "capacity_utilization": 0.88,
-    "is_hod": false,
-    "role": "Staff Therapist",
-    "years_experience": 8,
-    "experience_level": "senior",
-    "available_slots": [
-      {
-        "date": "2025-12-08",
-        "time": "09:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "10:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "14:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "15:00",
-        "available": true
-      }
-    ]
+    "available_slots": []
   },
   {
     "provider_id": "P005",
@@ -227,8 +99,8 @@
     "specialty": "Orthopedic Physical Therapy",
     "gender": "female",
     "status": "active",
-    "primary_location": "Metro PT Downtown",
-    "zip": "12345",
+    "primary_location": "Renew Physical Therapy",
+    "zip": "12340",
     "certifications": [
       "Orthopedic Clinical Specialist (OCS)",
       "Manual Therapy Certified",
@@ -251,80 +123,6 @@
     "role": "Staff Therapist",
     "years_experience": 12,
     "experience_level": "senior",
-    "available_slots": [
-      {
-        "date": "2025-12-08",
-        "time": "09:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "10:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "14:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "15:00",
-        "available": true
-      }
-    ]
-  },
-  {
-    "provider_id": "P006",
-    "name": "Robert Kim",
-    "specialty": "Sports Medicine Physical Therapy",
-    "gender": "male",
-    "status": "active",
-    "primary_location": "Metro PT Sports Center",
-    "zip": "12342",
-    "certifications": [
-      "Sports Clinical Specialist (SCS)",
-      "Athletic Training Certified",
-      "Injury Prevention Specialist"
-    ],
-    "available_days": [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday"
-    ],
-    "unavailable_dates": [],
-    "working_hours_start": "07:00",
-    "working_hours_end": "18:00",
-    "current_patient_load": 0,
-    "max_patient_capacity": 30,
-    "capacity_utilization": 0.4,
-    "is_hod": false,
-    "role": "Staff Therapist",
-    "years_experience": 9,
-    "experience_level": "senior",
-    "available_slots": [
-      {
-        "date": "2025-12-08",
-        "time": "09:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "10:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "14:00",
-        "available": true
-      },
-      {
-        "date": "2025-12-08",
-        "time": "15:00",
-        "available": true
-      }
-    ]
+    "available_slots": []
   }
 ]

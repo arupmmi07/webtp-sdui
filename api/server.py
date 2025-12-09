@@ -1053,9 +1053,9 @@ async def get_emails():
 
 class DemoResetRequest(BaseModel):
     start_date: Optional[str] = None  # YYYY-MM-DD, defaults to today
-    days_ahead: int = 7  # Number of days to create appointments for
+    days_ahead: int = 4  # Number of days to create appointments for
     providers: Optional[List[str]] = None  # List of provider IDs, defaults to all
-    appointments_per_day: int = 3  # Number of appointments to create per day (default 3 for testing)
+    appointments_per_day: int = 7  # Number of appointments to create per day (default 7 for demo)
 
 @app.post(
     "/api/demo/reset",

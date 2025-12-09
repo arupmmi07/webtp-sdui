@@ -4,8 +4,8 @@ Combines the web UI and API into a single server for simplified deployment.
 Serves both HTML pages and provides all necessary API endpoints.
 """
 
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi import FastAPI, HTTPException, Query, Request, Form, Depends
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -17,6 +17,8 @@ import json
 from datetime import datetime, timedelta
 import random
 import sys
+import secrets
+from starlette.middleware.sessions import SessionMiddleware
 
 # Load environment variables from .env file
 try:
@@ -47,6 +49,10 @@ sys.path.insert(0, str(Path(__file__).parent))
 from demo.email_preview import mock_send_email
 from config.email_templates import EmailTemplates
 from config.llm_settings import LLMSettings
+
+# Demo protection settings
+DEMO_PASSWORD = os.getenv("DEMO_PASSWORD", "balance")  # Change this!
+SESSION_SECRET = os.getenv("SESSION_SECRET", secrets.token_urlsafe(32))
 
 # Create FastAPI app
 app = FastAPI(
@@ -124,8 +130,8 @@ class Patient(BaseModel):
     max_distance_miles: Optional[float] = None
 
 class DemoResetRequest(BaseModel):
-    days_ahead: int = 5
-    appointments_per_day: int = 3
+    days_ahead: int = 4
+    appointments_per_day: int = 7
     admin_key: str = None  # Required for admin operations
 
 # Data directory
@@ -140,6 +146,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add session middleware for demo protection
+app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET)
+
 # Get paths
 current_dir = Path(__file__).parent
 static_dir = current_dir / "static"
@@ -147,6 +156,151 @@ static_dir = current_dir / "static"
 # Mount static files
 if static_dir.exists():
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+# ============================================================
+# Authentication Helper Functions
+# ============================================================
+
+def is_authenticated(request: Request) -> bool:
+    """Check if user is authenticated for demo access."""
+    return request.session.get("demo_authenticated", False)
+
+def require_demo_auth(request: Request):
+    """Dependency to require demo authentication."""
+    if not is_authenticated(request):
+        raise HTTPException(status_code=401, detail="Demo authentication required")
+    return True
+
+# ============================================================
+# Authentication Endpoints
+# ============================================================
+
+@app.get("/login", response_class=HTMLResponse)
+async def login_page():
+    """Simple login page for demo access."""
+    return HTMLResponse(content="""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Demo Access - WebTP</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            .login-container {
+                background: white;
+                border-radius: 20px;
+                padding: 40px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                max-width: 400px;
+                width: 100%;
+                text-align: center;
+            }
+            h1 {
+                color: #2c3e50;
+                margin-bottom: 10px;
+                font-size: 2rem;
+            }
+            .subtitle {
+                color: #7f8c8d;
+                margin-bottom: 30px;
+                font-size: 1rem;
+            }
+            .form-group {
+                margin-bottom: 20px;
+                text-align: left;
+            }
+            label {
+                display: block;
+                margin-bottom: 5px;
+                color: #2c3e50;
+                font-weight: 600;
+            }
+            input[type="password"] {
+                width: 100%;
+                padding: 12px;
+                border: 2px solid #ecf0f1;
+                border-radius: 8px;
+                font-size: 1rem;
+                transition: border-color 0.3s;
+            }
+            input[type="password"]:focus {
+                outline: none;
+                border-color: #667eea;
+            }
+            .login-btn {
+                width: 100%;
+                padding: 12px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+            .login-btn:hover {
+                transform: translateY(-2px);
+            }
+            .error {
+                color: #e74c3c;
+                margin-top: 10px;
+                font-size: 0.9rem;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="login-container">
+            <h1>🏥 WebTP Demo</h1>
+            <p class="subtitle">Enter password to access demo</p>
+            
+            <form method="post" action="/login">
+                <div class="form-group">
+                    <label for="password">Demo Password:</label>
+                    <input type="password" id="password" name="password" required autofocus>
+                </div>
+                <button type="submit" class="login-btn">Access Demo</button>
+            </form>
+            
+            <div id="error" class="error" style="display: none;"></div>
+        </div>
+        
+        <script>
+            // Show error if present in URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('error')) {
+                document.getElementById('error').textContent = 'Invalid password. Please try again.';
+                document.getElementById('error').style.display = 'block';
+            }
+        </script>
+    </body>
+    </html>
+    """)
+
+@app.post("/login")
+async def login(request: Request, password: str = Form(...)):
+    """Handle login form submission."""
+    if password == DEMO_PASSWORD:
+        request.session["demo_authenticated"] = True
+        return RedirectResponse(url="/", status_code=303)
+    else:
+        return RedirectResponse(url="/login?error=1", status_code=303)
+
+@app.get("/logout")
+async def logout(request: Request):
+    """Logout and clear session."""
+    request.session.clear()
+    return RedirectResponse(url="/login", status_code=303)
 
 # ============================================================
 # API Endpoints
@@ -1179,14 +1333,14 @@ Situation:
 - Original provider: {old_provider.get('name')} ({old_provider.get('specialty', 'Healthcare Provider')})
 - Reason for change: {reason}
 - New provider: {new_provider.get('name')} ({new_provider.get('specialty', 'Healthcare Provider')})
-- Location: {new_provider.get('primary_location', 'Metro PT Downtown')}
+- Location: {new_provider.get('primary_location', 'Renew Physical Therapy')}
 
 Requirements:
 - Be empathetic and professional
 - Explain the situation clearly
 - Highlight the new provider's qualifications
 - Keep it concise but warm
-- End with clinic contact: Metro Physical Therapy, (555) 123-4567
+- End with clinic contact: Renew Physical Therapy, (555) 123-4567
 - Use minimal formatting - avoid excessive bold text or markdown
 - Write in a natural, conversational tone
 - DO NOT include any confirmation links or buttons in the email body
@@ -1316,7 +1470,7 @@ def _send_rescheduling_email(appointment, patient, old_provider, new_provider, r
                 location=new_provider.get('primary_location', 'Clinic'),
                 condition=patient.get('condition', 'your condition'),
                 confirmation_link=f"/confirm?token={appointment.get('appointment_id')}",
-                clinic_name="Metro Physical Therapy",
+                clinic_name="Renew Physical Therapy",
                 clinic_phone="(555) 123-4567"
             )
             print("⚠️  Using template fallback email")
@@ -1424,10 +1578,10 @@ def _add_to_waitlist(appointment, patient, reason):
         appointment['cancellation_reason'] = f'Provider unavailable - waitlist error: {str(e)}'
 
 @app.post("/api/demo/reset")
-async def reset_demo_data(request: DemoResetRequest):
+async def reset_demo_data(request_obj: DemoResetRequest):
     """Reset demo data with realistic appointments - ADMIN ONLY."""
     # Admin protection
-    if request.admin_key != "demo_admin_2024":
+    if request_obj.admin_key != "demo_admin_2024":
         raise HTTPException(
             status_code=403,
             detail="Access denied. Valid admin_key required in request body."
@@ -1463,9 +1617,19 @@ async def reset_demo_data(request: DemoResetRequest):
         # Generate appointments
         appointments = []
         appointment_counter = 1
-        start_date = datetime.now().date()
-        current_time = datetime.now()
-        time_slots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"]
+        
+        # Determine start date - if it's past 7 PM, start from next business day
+        now = datetime.now()
+        if now.hour >= 19:  # 7 PM or later
+            start_date = now.date() + timedelta(days=1)
+            # If tomorrow is weekend, move to next Monday
+            while start_date.weekday() >= 5:  # Saturday=5, Sunday=6
+                start_date += timedelta(days=1)
+        else:
+            start_date = now.date()
+            
+        current_time = now
+        time_slots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"]
         
         # Provider specialty mapping
         provider_specialty_map = {p['provider_id']: p.get('specialty', '') for p in providers}
@@ -1474,7 +1638,7 @@ async def reset_demo_data(request: DemoResetRequest):
         used_patients = set()
         available_patients = [p for p in realistic_patients if p.get('match_type') != 'waitlist']
         
-        for day_offset in range(request.days_ahead):
+        for day_offset in range(request_obj.days_ahead):
             current_date = start_date + timedelta(days=day_offset)
             
             # Skip weekends
@@ -1490,15 +1654,15 @@ async def reset_demo_data(request: DemoResetRequest):
             
             # First, try to get unique patients (not used on any previous day)
             for patient_data in available_patients:
-                if patient_data['patient_id'] not in used_patients and len(day_patients) < request.appointments_per_day:
+                if patient_data['patient_id'] not in used_patients and len(day_patients) < request_obj.appointments_per_day:
                     day_patients.append(patient_data)
                     used_patients.add(patient_data['patient_id'])
             
             # If we need more patients, reuse from the beginning (but still avoid same-day duplicates)
-            if len(day_patients) < request.appointments_per_day:
-                remaining_needed = request.appointments_per_day - len(day_patients)
+            if len(day_patients) < request_obj.appointments_per_day:
+                remaining_needed = request_obj.appointments_per_day - len(day_patients)
                 patient_cycle_index = 0
-                while len(day_patients) < request.appointments_per_day and patient_cycle_index < len(available_patients):
+                while len(day_patients) < request_obj.appointments_per_day and patient_cycle_index < len(available_patients):
                     patient_data = available_patients[patient_cycle_index]
                     # Avoid duplicates within the same day
                     if not any(p['patient_id'] == patient_data['patient_id'] for p in day_patients):
@@ -1575,11 +1739,11 @@ async def reset_demo_data(request: DemoResetRequest):
             "appointments_created": len(appointments),
             "date_range": {
                 "start": start_date.strftime("%Y-%m-%d"),
-                "end": (start_date + timedelta(days=request.days_ahead - 1)).strftime("%Y-%m-%d")
+                "end": (start_date + timedelta(days=request_obj.days_ahead - 1)).strftime("%Y-%m-%d")
             },
             "providers_included": len(providers),
             "patients_used": len(realistic_patients),
-            "appointments_per_day": request.appointments_per_day
+            "appointments_per_day": request_obj.appointments_per_day
         }
         
     except Exception as e:
@@ -1590,8 +1754,11 @@ async def reset_demo_data(request: DemoResetRequest):
 # ============================================================
 
 @app.get("/", response_class=HTMLResponse)
-async def root():
+async def root(request: Request):
     """Comprehensive index page with all available URLs and endpoints."""
+    # Check if user is authenticated for demo access
+    if not is_authenticated(request):
+        return RedirectResponse(url="/login", status_code=303)
     return HTMLResponse(content="""
     <!DOCTYPE html>
     <html lang="en">
@@ -1713,13 +1880,22 @@ async def root():
             <div class="section">
                 <h2 class="section-title">🖥️ User Interface Pages</h2>
                 <div class="url-grid">
+                    <a href="/admin/reset.html?admin_key=demo_admin_2024" target="_blank" class="url-card">
+                        <div class="url-header">
+                            <span class="url-icon">🔄</span>
+                            <span class="url-title">Demo Reset</span>
+                        </div>
+                        <div class="url-path">/admin/reset.html</div>
+                        <div class="url-desc">Generate realistic PT appointments to populate your schedule. Start here to create demo data.</div>
+                    </a>
+                    
                     <a href="/schedule.html" target="_blank" class="url-card">
                         <div class="url-header">
                             <span class="url-icon">📅</span>
                             <span class="url-title">Appointment Schedule</span>
                         </div>
                         <div class="url-path">/schedule.html</div>
-                        <div class="url-desc">Interactive calendar showing all appointments, provider availability, and real-time scheduling</div>
+                        <div class="url-desc">View your PT clinic schedule, manage appointments, and see real-time availability across providers.</div>
                     </a>
                     
                     <a href="/emails.html" target="_blank" class="url-card">
@@ -1728,7 +1904,7 @@ async def root():
                             <span class="url-title">Patient Emails</span>
                         </div>
                         <div class="url-path">/emails.html</div>
-                        <div class="url-desc">View AI-generated patient communications, confirmations, and rescheduling notifications</div>
+                        <div class="url-desc">See automated patient communications sent by the system - confirmations, reminders, and rescheduling messages.</div>
                     </a>
                     
                 </div>
@@ -1819,11 +1995,30 @@ async def root():
                         <div class="url-desc">System health status and uptime information</div>
                     </a>
                 </div>
+                
+            </div>
+            
+            <!-- Prompts Section -->
+            <div class="section">
+                <h2 class="section-title">📝 Prompts (stored in Langfuse)</h2>
+                <div class="api-section">
+                    <div style="margin-bottom: 15px;">
+                        <span class="method-badge get">PROMPT</span>
+                        <code>healthcare-orchestrator-template</code> - Main scheduling and provider assignment logic
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <span class="method-badge post">PROMPT</span>
+                        <code>patient-engagement-message</code> - Automated patient communication templates
+                    </div>
+                </div>
             </div>
             
             <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #ecf0f1; color: #7f8c8d;">
                 <p>🚀 WebTP Demo - Physical Therapy Scheduling & AI Assistant</p>
                 <p style="font-size: 0.9rem; margin-top: 5px;">All endpoints are live and ready for testing</p>
+                <p style="margin-top: 15px;">
+                    <a href="/logout" style="color: #e74c3c; text-decoration: none; font-size: 0.9rem;">🚪 Logout</a>
+                </p>
             </div>
         </div>
     </body>
@@ -1831,7 +2026,7 @@ async def root():
     """)
 
 @app.get("/schedule.html", response_class=FileResponse)
-async def get_schedule():
+async def get_schedule(request: Request, _: bool = Depends(require_demo_auth)):
     """Serve schedule HTML page."""
     file_path = static_dir / "schedule.html"
     if not file_path.exists():
@@ -1839,7 +2034,7 @@ async def get_schedule():
     return FileResponse(str(file_path), media_type="text/html")
 
 @app.get("/emails.html", response_class=FileResponse)
-async def get_emails():
+async def get_emails(request: Request, _: bool = Depends(require_demo_auth)):
     """Serve emails HTML page."""
     file_path = static_dir / "emails.html"
     if not file_path.exists():
@@ -1847,7 +2042,7 @@ async def get_emails():
     return FileResponse(str(file_path), media_type="text/html")
 
 @app.get("/admin/reset.html", response_class=FileResponse)
-async def get_reset(admin_key: str = None):
+async def get_reset(request: Request, admin_key: str = None, _: bool = Depends(require_demo_auth)):
     """Serve reset HTML page - ADMIN ONLY."""
     # Simple admin protection - in production, use proper authentication
     if admin_key != "demo_admin_2024":
