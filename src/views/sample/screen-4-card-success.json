@@ -1,0 +1,28 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2 },
+  "children": [
+    {
+      "type": "Card",
+      "props": { "variant": "outlined", "sx": { "p": 2, "bgcolor": "success.light" } },
+      "children": [
+        {
+          "type": "Column",
+          "props": { "spacing": 1 },
+          "children": [
+            { "type": "Text", "props": { "value": "Email Sent Successfully", "variant": "h6", "fontWeight": 600 } },
+            { "type": "Text", "props": { "value": "Dr. Chen's clinic will receive the request shortly.", "variant": "body2" } }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Row",
+      "props": { "spacing": 1 },
+      "children": [
+        { "type": "Button", "props": { "label": "Continue", "variant": "contained" }, "action": { "type": "navigate", "to": "/screen/5" } },
+        { "type": "Button", "props": { "label": "Back to Dashboard", "variant": "outlined" }, "action": { "type": "navigate", "to": "/screen/1" } }
+      ]
+    }
+  ]
+}

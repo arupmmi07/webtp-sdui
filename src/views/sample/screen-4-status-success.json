@@ -1,0 +1,25 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2 },
+  "children": [
+    {
+      "type": "StatusMessage",
+      "props": {
+        "message": "Email successfully sent to Dr. Chen's clinic.",
+        "severity": "success"
+      }
+    },
+    {
+      "type": "Alert",
+      "props": {
+        "message": "Sarah Johnson's referral form request has been delivered.",
+        "severity": "success"
+      }
+    },
+    {
+      "type": "Button",
+      "props": { "label": "Next Pending Referral", "variant": "contained" },
+      "action": { "type": "navigate", "to": "/screen/5" }
+    }
+  ]
+}

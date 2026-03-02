@@ -1,0 +1,51 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2 },
+  "children": [
+    {
+      "type": "Message",
+      "props": {
+        "content": "I found issues with the referral form. Please review below.",
+        "timestamp": "9:31 am"
+      }
+    },
+    {
+      "type": "Row",
+      "props": { "spacing": 2, "flexWrap": "wrap", "alignItems": "flex-start" },
+      "children": [
+        {
+          "type": "Card",
+          "props": { "variant": "outlined", "sx": { "flex": 1, "minWidth": 280 } },
+          "children": [
+            {
+              "type": "Column",
+              "props": { "spacing": 1 },
+              "children": [
+                { "type": "Text", "props": { "value": "REFERRAL FORM", "variant": "subtitle2", "fontWeight": 600 } },
+                { "type": "Text", "props": { "value": "Patient: Maria Garcia | DOB: 03/15/1990", "variant": "body2" } },
+                { "type": "Text", "props": { "value": "Referring: Dr. Amy Chen", "variant": "body2" } }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "props": { "spacing": 1, "sx": { "minWidth": 200 } },
+          "children": [
+            {
+              "type": "Select",
+              "props": {
+                "label": "Action",
+                "options": [
+                  { "value": "revise", "label": "Request revision" },
+                  { "value": "proceed", "label": "Proceed anyway" }
+                ]
+              }
+            },
+            { "type": "Button", "props": { "label": "Complete", "variant": "contained" }, "action": { "type": "navigate", "to": "/screen/3" } }
+          ]
+        }
+      ]
+    }
+  ]
+}

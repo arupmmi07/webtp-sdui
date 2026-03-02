@@ -1,0 +1,160 @@
+import { Box, TextField, InputAdornment, IconButton, Typography } from '@mui/material'
+import UploadFileIcon from '@mui/icons-material/UploadFile'
+import MicIcon from '@mui/icons-material/Mic'
+import HistoryIcon from '@mui/icons-material/History'
+import AssignmentIcon from '@mui/icons-material/Assignment'
+import ViewModuleIcon from '@mui/icons-material/ViewModule'
+import { SummaryStat } from '@/components/internal/SummaryStat'
+
+const DEFAULT_SUMMARY_ITEMS = [
+  { label: 'Due appointments', value: '28' },
+  { label: 'missing authorization', value: '3' },
+  { label: 'benefits expiring', value: '2' },
+  { label: 'in copays to collect', value: '$1,260' },
+]
+
+interface FooterProps {
+  summaryItems?: { label: string; value: string }[]
+  moreLabel?: string
+}
+
+export function Footer({ summaryItems = DEFAULT_SUMMARY_ITEMS, moreLabel = '+8 More' }: FooterProps) {
+  return (
+    <Box
+      component="footer"
+      sx={{
+        position: 'sticky',
+        bottom: 0,
+        borderTop: 1,
+        borderColor: 'grey.300',
+        bgcolor: '#fff',
+        py: 1.5,
+        px: 2,
+      }}
+    >
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+          <TextField
+            size="small"
+            placeholder="Search or ask: patient status, eligibility, copays, scheduling..."
+            variant="outlined"
+            sx={{
+              flex: 1,
+              minWidth: 280,
+              maxWidth: 500,
+              '& .MuiOutlinedInput-root': {
+                bgcolor: '#fff',
+                borderRadius: 2,
+                borderColor: 'grey.300',
+                '& fieldset': { borderColor: 'grey.300' },
+                '&:hover fieldset': { borderColor: 'grey.400' },
+              },
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start" sx={{ ml: 0.5 }}>
+                  <UploadFileIcon sx={{ fontSize: 20, color: 'primary.main' }} />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end" sx={{ mr: 0.5 }}>
+                  <MicIcon sx={{ fontSize: 20, color: 'primary.main' }} />
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
+              <IconButton
+                size="small"
+                sx={{
+                  border: '1px solid',
+                  borderColor: 'primary.main',
+                  color: 'primary.main',
+                  borderRadius: '50%',
+                  width: 40,
+                  height: 40,
+                  '&:hover': { bgcolor: 'primary.light', color: 'primary.contrastText' },
+                }}
+              >
+                <HistoryIcon sx={{ fontSize: 20 }} />
+              </IconButton>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', color: 'text.secondary', fontWeight: 500 }}>
+                History
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
+              <IconButton
+                size="small"
+                sx={{
+                  border: '1px solid',
+                  borderColor: 'primary.main',
+                  color: 'primary.main',
+                  borderRadius: '50%',
+                  width: 40,
+                  height: 40,
+                  '&:hover': { bgcolor: 'primary.light', color: 'primary.contrastText' },
+                }}
+              >
+                <AssignmentIcon sx={{ fontSize: 20 }} />
+              </IconButton>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', color: 'text.secondary', fontWeight: 500 }}>
+                12 Tasks
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
+              <IconButton
+                size="small"
+                sx={{
+                  border: '1px solid',
+                  borderColor: 'primary.main',
+                  color: 'primary.main',
+                  borderRadius: '50%',
+                  width: 40,
+                  height: 40,
+                  '&:hover': { bgcolor: 'primary.light', color: 'primary.contrastText' },
+                }}
+              >
+                <ViewModuleIcon sx={{ fontSize: 20 }} />
+              </IconButton>
+              <Typography variant="caption" sx={{ fontSize: '0.7rem', color: 'text.secondary', fontWeight: 500 }}>
+                5 Activities
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            flexWrap: 'wrap',
+            px: 2,
+            py: 1.25,
+            mx: -2,
+            bgcolor: '#374151',
+            borderRadius: 0,
+            color: '#fff',
+          }}
+        >
+          <Typography variant="body2" sx={{ fontWeight: 600, color: 'inherit' }}>
+            Day&apos;s Summary:
+          </Typography>
+          <SummaryStat items={summaryItems} spacing={1.5} valueFirst inverted />
+          <Typography
+            component="span"
+            variant="body2"
+            sx={{
+              cursor: 'pointer',
+              fontWeight: 600,
+              color: 'rgba(255,255,255,0.9)',
+              '&:hover': { textDecoration: 'underline' },
+            }}
+          >
+            {moreLabel}
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  )
+}

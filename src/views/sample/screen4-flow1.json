@@ -1,0 +1,91 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2, "style": { "maxWidth": 720 } },
+  "children": [
+    {
+      "type": "Card",
+      "props": { "variant": "outlined", "elevation": 0, "sx": { "p": 2, "bgcolor": "grey.50" } },
+      "children": [
+        {
+          "type": "Column",
+          "props": { "spacing": 1.5 },
+          "children": [
+            { "type": "Text", "props": { "value": "Date of Injury/Onset:", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5, "color": "text.secondary" } } },
+            {
+              "type": "Text",
+              "props": {
+                "value": "REFERRED BY",
+                "variant": "caption",
+                "sx": { "bgcolor": "grey.800", "color": "white", "px": 1.5, "py": 0.75, "fontWeight": 700, "letterSpacing": 1, "mt": 0.5 }
+              }
+            },
+            { "type": "Text", "props": { "value": "Referring Physician: Dr. Chris David", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+            { "type": "Text", "props": { "value": "Phone: (555) 987-6543", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+            { "type": "Text", "props": { "value": "Fax: (555) 987-1234", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+            { "type": "Text", "props": { "value": "Clinic:", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5, "color": "text.secondary" } } },
+            {
+              "type": "Text",
+              "props": {
+                "value": "PRESCRIPTION FOR PHYSICAL THERAPY",
+                "variant": "caption",
+                "sx": { "bgcolor": "grey.800", "color": "white", "px": 1.5, "py": 0.75, "fontWeight": 700, "letterSpacing": 1, "mt": 1 }
+              }
+            },
+            { "type": "Text", "props": { "value": "Evaluation and Treat: ✓", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Row",
+      "props": { "spacing": 1, "flexWrap": "wrap" },
+      "children": [
+        {
+          "type": "Button",
+          "props": { "label": "Complete Registration", "variant": "contained" },
+          "action": { "type": "navigate", "to": "/screen/5" }
+        },
+        {
+          "type": "Select",
+          "props": {
+            "label": "Request Revised Form",
+            "options": [
+              { "value": "missing", "label": "Information missing" },
+              { "value": "legible", "label": "Form not legible" },
+              { "value": "custom", "label": "Send custom message" }
+            ]
+          }
+        },
+        {
+          "type": "Button",
+          "props": { "label": "Upload Revised Referral Form", "variant": "text", "color": "primary" },
+          "action": { "type": "emit", "event": "upload-referral" }
+        },
+        {
+          "type": "Button",
+          "props": { "label": "Next Referral in Queue", "variant": "text", "color": "primary" },
+          "action": { "type": "emit", "event": "next-referral" }
+        }
+      ]
+    },
+    {
+      "type": "Message",
+      "props": {
+        "content": "Here is your message for Dr. Chris David's clinic. You can send it now to get updated referral form.",
+        "timestamp": "9:31 am"
+      }
+    },
+    {
+      "type": "Message",
+      "props": {
+        "content": "Dear Team,\n\nWe noticed that the Date of Injury and Clinic fields are currently blank in Sarah Johnson's referral form.\n\nCould you please update these details and share the revised referral form at your earliest convenience so we can proceed with scheduling and documentation?\n\nThank you for your prompt support.",
+        "timestamp": "",
+        "actions": [
+          { "icon": "mail" },
+          { "icon": "chat" },
+          { "icon": "document" }
+        ]
+      }
+    }
+  ]
+}

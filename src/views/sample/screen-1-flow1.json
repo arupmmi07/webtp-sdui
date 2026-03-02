@@ -1,0 +1,98 @@
+{
+  "type": "Row",
+  "props": {
+    "spacing": 4,
+    "alignItems": "flex-start",
+    "flexWrap": "wrap"
+  },
+  "style": { "maxWidth": 960, "mx": "auto" },
+  "children": [
+    {
+      "type": "Column",
+      "props": { "spacing": 2.5, "flex": 1, "minWidth": 280 },
+      "children": [
+        {
+          "type": "GreetingAvatar",
+          "props": { "greeting": "Good Morning John" }
+        },
+        {
+          "type": "Text",
+          "props": {
+            "value": "It's going to be a busy day, and your expertise is needed to address urgent exceptions, revenue risk alerts, retention risks, incomplete documentation, and operational bottlenecks.",
+            "variant": "body1",
+            "color": "text.secondary",
+            "sx": { "maxWidth": 560 }
+          }
+        },
+        {
+          "type": "Text",
+          "props": { "value": "Let's start the day with", "variant": "subtitle1", "fontWeight": 600 }
+        },
+        {
+          "type": "Row",
+          "props": { "spacing": 1, "flexWrap": "wrap" },
+          "children": [
+            {
+              "type": "Button",
+              "props": {
+                "label": "5 Referrals in Queue",
+                "variant": "outlined",
+                "sx": { "bgcolor": "rgba(211,47,47,0.08)", "borderColor": "error.main", "color": "error.dark", "textTransform": "none", "fontWeight": 600 }
+              },
+              "action": { "type": "navigate", "to": "/screen/2" }
+            },
+            {
+              "type": "Button",
+              "props": {
+                "label": "2 High Risk Patients Not Responded",
+                "variant": "outlined",
+                "sx": { "bgcolor": "rgba(211,47,47,0.08)", "borderColor": "error.main", "color": "error.dark", "textTransform": "none", "fontWeight": 600 }
+              },
+              "action": { "type": "navigate", "to": "/screen/2" }
+            },
+            {
+              "type": "Button",
+              "props": {
+                "label": "5 Referrals Missing Info",
+                "variant": "outlined",
+                "sx": { "bgcolor": "rgba(46,125,50,0.12)", "borderColor": "success.main", "color": "success.dark", "textTransform": "none", "fontWeight": 600 }
+              },
+              "action": { "type": "navigate", "to": "/screen/2" }
+            },
+            {
+              "type": "Button",
+              "props": {
+                "label": "2 Patients Cancelled Appointment",
+                "variant": "outlined",
+                "sx": { "bgcolor": "rgba(237,108,2,0.12)", "borderColor": "warning.main", "color": "warning.dark", "textTransform": "none", "fontWeight": 600 }
+              },
+              "action": { "type": "emit", "event": "cancelled-appointments" }
+            },
+            {
+              "type": "Button",
+              "props": {
+                "label": "8 Auto Scheduling Declined",
+                "variant": "outlined",
+                "sx": { "bgcolor": "rgba(25,118,210,0.12)", "borderColor": "info.main", "color": "info.dark", "textTransform": "none", "fontWeight": 600 }
+              },
+              "action": { "type": "emit", "event": "scheduling-declined" }
+            },
+            {
+              "type": "Button",
+              "props": {
+                "label": "3 Therapists Unavailable Tomorrow",
+                "variant": "outlined",
+                "sx": { "bgcolor": "rgba(25,118,210,0.12)", "borderColor": "info.main", "color": "info.dark", "textTransform": "none", "fontWeight": 600 }
+              },
+              "action": { "type": "emit", "event": "therapists-unavailable" }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "DashboardIllustration",
+      "props": { "width": 320, "height": 280 }
+    }
+  ]
+}

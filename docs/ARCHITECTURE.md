@@ -1,503 +1,114 @@
-# System Architecture
+# SDUI Architecture
 
-## High-Level Architecture
+## 1. Core Components
 
-```
-┌─────────────────────────────────────────────────────┐
-│  CLI Interface (Demo)                               │
-│  - Interactive command line                         │
-│  - Real-time progress display                       │
-│  - Audit log viewer                                 │
-└──────────────────┬──────────────────────────────────┘
-                   ↓
-┌─────────────────────────────────────────────────────┐
-│  LangFuse (Observability Platform)                  │
-│  - Prompt versioning & management                   │
-│  - Request tracing & debugging                      │
-│  - Cost tracking & analytics                        │
-│  - A/B testing & experimentation                    │
-└──────────────────┬──────────────────────────────────┘
-                   ↓
-┌─────────────────────────────────────────────────────┐
-│  LiteLLM (LLM Gateway/Router)                       │
-│  - Unified API for 100+ providers                   │
-│  - Automatic fallbacks (Claude→GPT-4→Gemini)        │
-│  - Load balancing & rate limiting                   │
-│  - Cost optimization & caching                      │
-└──────────────────┬──────────────────────────────────┘
-                   ↓
-         ┌─────────┴──────────┬──────────────┐
-         ↓                    ↓              ↓
-    [Anthropic]          [OpenAI]        [Google]
-    Claude Sonnet        GPT-4           Gemini Pro
-    (Primary)           (Fallback 1)    (Fallback 2)
-         └─────────┬──────────┴──────────────┘
-                   ↓
-┌─────────────────────────────────────────────────────┐
-│  LangGraph Orchestrator                             │
-│  - Reads PDF knowledge for ALL rules                │
-│  - Orchestrates 6-stage workflow                    │
-│  - Emits events for A2A communication               │
-│  - Makes dynamic decisions                          │
-└──────────────────┬──────────────────────────────────┘
-                   ↓
-         ┌─────────────────┐
-         │  Event Queue    │
-         │  (Python Queue  │
-         │   → Redis later)│
-         └────────┬────────┘
-                  │
-    ┌─────────────┼─────────────┐
-    ↓                           ↓
-┌───────────────────────────────────────────────┐
-│  SMART SCHEDULING AGENT                       │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
-│  │ Trigger  │  │ Matching │  │ Backfill │   │
-│  │ Handler  │  │ & Scoring│  │ & Audit  │   │
-│  └──────────┘  └──────────┘  └──────────┘   │
-│  • Priority Scoring  • 8 Filters             │
-│  • No-Show Risk     • 5 Scoring Factors      │
-│  • Waitlist Mgmt    • Compliance Gating      │
-└───────────────────────────────────────────────┘
-                    ↓
-┌───────────────────────────────────────────────┐
-│  PATIENT ENGAGEMENT AGENT                     │
-│  ┌──────────────────────────────────────┐    │
-│  │ Automated Patient Offer Flow         │    │
-│  └──────────────────────────────────────┘    │
-│  • Multi-Channel (SMS/Email/IVR)             │
-│  • Consent Management                        │
-│  • Response Handling                         │
-└───────────────────────────────────────────────┘
-                   ↓
-     ┌─────────────────────────────────┐
-     │  MCP Servers (2)                │
-     ├─────────────────┬───────────────┤
-     │ Knowledge MCP   │ Domain API MCP│
-     │ - Matching      │ - Provider API│
-     │   rules         │ - Patient API │
-     │ - Scoring       │ - Appointment │
-     │   weights       │ - Notification│
-     │ - Payer rules   │ - Waitlist API│
-     │ - POC policies  │               │
-     │ - Workflow      │               │
-     └─────────────────┴───────────────┘
+### 1.1 Parser / Validator
+
+- Validates JSON against schema v1
+- Returns typed `SDUINode` tree or validation errors
+- Handles unknown types (fallback or skip)
+
+### 1.2 Component Registry
+
+```typescript
+type ComponentEntry = {
+  component: React.ComponentType<any>;
+  source: "internal" | "mui" | "antd" | "custom";
+  allowedProps?: string[];
+};
+
+const registry: Record<string, ComponentEntry>;
 ```
 
-## Layered Architecture
+- Maps `type` string → React component
+- Supports internal and external libs
+- No npm package names in JSON — registry is code-defined
 
-### Layer 0: Observability & Gateway (Production Infrastructure)
+### 1.3 Renderer Engine
 
-**Purpose:** Observability, monitoring, and vendor abstraction at the infrastructure level
+- Recursive `renderNode(node)` function
+- Binds actions to component props via `bindActions`
+- Applies `style` to wrapper or component
+- Renders `children` recursively
 
-```
-LangFuse (Observability Platform)
-├── Prompt Management       # Version and manage prompts in UI
-├── Tracing                # Trace every LLM call end-to-end
-├── Analytics              # Cost, latency, error tracking
-└── A/B Testing            # Test prompt variations
+### 1.4 Data Injection Layer
 
-LiteLLM (LLM Gateway)
-├── Unified API            # One API for 100+ providers
-├── Automatic Fallbacks    # Claude → GPT-4 → Gemini
-├── Load Balancing         # Distribute across instances
-├── Rate Limiting          # Prevent quota exhaustion
-└── Cost Optimization      # Caching, routing
-```
+- Reads `dataSource`, `fieldMapping` from JSON nodes
+- Fetches data (API, context, props) at runtime
+- Injects resolved data into component props before render
+- **Critical**: JSON never contains data; only binding config
 
-### Layer 1: Interfaces (Vendor-Agnostic)
+### 1.5 Action Executor
 
-**Purpose:** Abstract all external dependencies to enable plug-and-play
+- Central handler for all action types
+- Injects `onClick`, `onEventClick`, etc. from JSON `action`
+- EMR-aware for openForm, openDrawer, openWizard
 
-```
-interfaces/
-├── llm_provider.py         # Abstract LLM interface
-├── workflow_engine.py      # Abstract workflow orchestrator
-├── event_bus.py           # Abstract event system
-└── risk_calculator.py     # Abstract no-show risk calculation
-```
+---
 
-**Key Principle:** Code to interfaces, not implementations
-
-### Layer 2: Adapters (Pluggable Implementations)
-
-**Purpose:** Concrete implementations that can be swapped
+## 2. Data Flow
 
 ```
-adapters/
-├── llm/
-│   ├── litellm_adapter.py      # LiteLLM (PRODUCTION - unified gateway)
-│   │                           # Handles: Claude, GPT-4, Gemini, Ollama, etc.
-│   └── [future custom adapters if needed]
-├── workflow/
-│   ├── langgraph_adapter.py    # LangGraph (recommended)
-│   └── custom_adapter.py       # Simple Python (fallback)
-└── events/
-    ├── memory_queue.py         # In-memory (start with this)
-    └── redis_adapter.py        # Redis (scale later)
+JSON Spec (Phase 1: static/mock | Phase 2: GraphQL)
+    ↓
+parse(spec) → SDUINode[]
+    ↓
+validate(nodes) → valid | errors
+    ↓
+resolveDataSources(nodes) → fetch/inject data (browser does this)
+    ↓
+renderNode(root, injectedData) → React elements
+    ↓
+User interaction → actionExecutor.execute(action)
 ```
 
-**Swap Example:**
-```python
-# Swap LLM provider by changing config - ZERO code changes!
-# config/litellm_config.yaml
-default_model: claude-sonnet      # ← Change to gpt-4-fallback or gemini-fallback
+### 2.1 Data Binding: Client-Side (Decision)
 
-# Or swap entire adapter
-from adapters.llm import LiteLLMAdapter
-llm = LiteLLMAdapter(model="claude-sonnet")  # Handles all providers!
-```
+**We use client-side data binding** — JSON has structure + `dataSource`; client fetches and injects.
 
-### Layer 3: Domain Logic (Business Rules)
+**Why not server-side (Airbnb/Netflix style)?** PHI cannot go in JSON. Appointments, patient names, referrals must be fetched from secure APIs by the client.
 
-**Purpose:** Core business logic independent of infrastructure
+**Industry**: Airbnb sends data with UI; FormIO separates schema and data. We follow FormIO-style for PHI screens. See `docs/DATA-BINDING-APPROACH.md`.
 
-```
-agents/
-├── smart_scheduling_agent.py      # SMART SCHEDULING AGENT
-│   ├── trigger_handler()          # Step 1: Identify affected appointments
-│   ├── filter_candidates()        # Step 2: Match candidate filtering
-│   ├── score_and_gate()          # Step 3: Compliance & score gating
-│   ├── backfill_automation()     # Step 5: Waitlist & backfill
-│   └── reconciliation()          # Step 6: Final reconciliation
-│
-└── patient_engagement_agent.py    # PATIENT ENGAGEMENT AGENT
-    └── automated_offer_flow()     # Step 4: Patient consent flow
-```
+**Flow**: JSON defines `dataSource` + `fieldMapping` → Data Injector fetches → Renderer passes resolved props to components.
 
-### Layer 4: Infrastructure (External Systems)
+---
 
-**Purpose:** Integration with external services via MCP
+## 3. Folder Structure (Proposed)
 
 ```
-mcp_servers/
-├── knowledge/
-│   ├── server.py          # Expose knowledge docs
-│   └── pdf_parser.py      # Parse PDF files
-└── domain_api/
-    ├── server.py          # Combined API server
-    ├── provider_api.py    # Provider CRUD
-    ├── patient_api.py     # Patient CRUD
-    ├── appointment_api.py # Appointment CRUD
-    ├── notification_api.py# SMS/Email/IVR
-    └── waitlist_api.py    # Waitlist management
+src/
+├── renderer/
+│   ├── engine.tsx          # renderNode, bindActions
+│   ├── registry.ts         # Component registry
+│   ├── parser.ts           # JSON → SDUINode
+│   ├── validator.ts        # Schema validation
+│   ├── data-injector.ts    # Resolve dataSource, fetch, inject
+│   └── action-executor.ts  # Action handling
+├── components/
+│   ├── internal/           # Text, Row, Column, Card, etc.
+│   └── wrappers/           # CalendarSchedulerWrapper
+├── schema/
+│   └── v1.ts               # Types, schema definition
+└── scenarios/
+    └── scheduler/          # EMR scheduler specs (JSON)
+        ├── doctor-scheduler.json      # Doctor view spec
+        └── front-desk-scheduler.json  # Front Desk view spec
 ```
 
-## Data Flow
+---
 
-### 6-Stage Workflow
+## 4. Integration Points
 
-```
-Stage 1: TRIGGER (Smart Scheduling Agent)
-Input: Therapist unavailability event
-Process: Calculate priority scores for all affected appointments
-Output: Prioritized appointment list
-Event: trigger_detected
-Agent: Smart Scheduling Agent
+### 4.1 With EMR Backend
 
-Stage 2: FILTERING (Smart Scheduling Agent)
-Input: Appointment + Available providers
-Process: Apply 8 hard constraint filters
-Output: Qualified provider list (3-5 providers)
-Event: candidates_filtered
-Agent: Smart Scheduling Agent
+- **Phase 1**: No backend. JSON from static files / mock.
+- **Phase 2**: GraphQL returns SDUI spec per user/role/context
+- Spec includes `CalendarScheduler` config + actions + data binding hints
+- **Data (appointments) always fetched by browser** — never in JSON. Renderer injects at runtime.
 
-Stage 3: SCORING & GATING (Smart Scheduling Agent)
-Input: Qualified providers + Patient profile
-Process: Apply 5 scoring factors + compliance gating
-Output: Ranked provider list (top 3)
-Event: candidates_scored
-Agent: Smart Scheduling Agent
+### 4.2 With Existing App
 
-Stage 4: CONSENT (Patient Engagement Agent)
-Input: Top-ranked provider + Patient preferences
-Process: Send offer via preferred channel, wait for response
-Output: Booked appointment OR declined
-Event: appointment_booked OR consent_declined_all
-Agent: Patient Engagement Agent
-
-Stage 5: BACKFILL (Smart Scheduling Agent)
-Input: Freed slot + High-risk patient list + Original patient availability
-Process: Fill freed slot + Reschedule original patient
-Output: Both slots filled OR HOD assignment
-Event: backfill_completed OR manual_review_needed
-Agent: Smart Scheduling Agent
-
-Stage 6: AUDIT (Smart Scheduling Agent)
-Input: All events from workflow
-Process: Aggregate, log, report, reconcile
-Output: Complete audit trail + Reports
-Event: session_complete
-Agent: Smart Scheduling Agent
-```
-
-## Agent-to-Agent (A2A) Communication
-
-### Event-Driven Pattern
-
-```python
-# Agent 1 emits event
-event_bus.emit("candidates_scored", {
-    "appointment_id": "A001",
-    "candidates": [...]
-})
-
-# Agent 2 listens and responds
-@event_bus.subscribe("candidates_scored")
-def handle_scored_candidates(event):
-    # Process and emit next event
-    result = consent_agent.execute(event)
-    event_bus.emit("appointment_booked", result)
-```
-
-**Benefits:**
-- Loose coupling between agents
-- Easy to add new agents
-- Handles concurrency naturally
-- Audit trail built-in
-
-## MCP Integration
-
-### Knowledge MCP Server
-
-**Exposes:** Knowledge documents as resources
-
-```
-Resources:
-- knowledge://matching-rules
-- knowledge://scoring-weights
-- knowledge://payer-rules
-- knowledge://poc-policies
-- knowledge://workflow-steps
-
-Tools:
-- search_knowledge(query: str) → results
-```
-
-### Domain API MCP Server
-
-**Exposes:** All business APIs as tools
-
-```
-Tools (Provider):
-- get_provider(provider_id) → Provider
-- list_providers(filters) → List[Provider]
-- check_availability(provider_id, date) → bool
-
-Tools (Patient):
-- get_patient(patient_id) → Patient
-- get_preferences(patient_id) → Preferences
-- get_no_show_risk(patient_id) → float
-
-Tools (Appointment):
-- get_appointment(appointment_id) → Appointment
-- update_appointment(appointment_id, updates) → Appointment
-- create_appointment(data) → Appointment
-
-Tools (Notification):
-- send_sms(phone, message) → MessageID
-- send_email(email, subject, body) → MessageID
-- send_ivr(phone, script) → CallID
-
-Tools (Waitlist):
-- add_to_waitlist(slot) → WaitlistEntry
-- query_waitlist(criteria) → List[WaitlistEntry]
-- fill_slot(slot_id, patient_id) → Appointment
-```
-
-## Configuration System
-
-### Multi-Level Configuration
-
-```yaml
-# config/llm_config.yaml
-provider: anthropic  # Swap here to change LLM
-anthropic:
-  model: claude-sonnet-4-20250514
-  api_key: ${ANTHROPIC_API_KEY}
-
-# config/mcp_servers.yaml
-knowledge:
-  type: stdio
-  command: python
-  args: ["-m", "mcp_servers.knowledge.server"]
-
-domain_api:
-  type: stdio
-  command: python
-  args: ["-m", "mcp_servers.domain_api.server"]
-  env:
-    BACKEND: mock  # Swap to 'webpt' for real API
-
-# config/scoring_weights.yaml
-continuity: 40
-specialty: 35
-preference: 30
-load_balance: 25
-day_match: 20
-
-# config/payer_rules.yaml
-medicare:
-  requires_poc: true
-  requires_prior_auth: false
-  approved_providers_only: true
-ppo:
-  requires_poc: false
-  requires_prior_auth: false
-workers_comp:
-  requires_poc: true
-  requires_prior_auth: true
-  requires_employer_auth: true
-```
-
-## Scalability Considerations
-
-### Current (MVP):
-- In-memory event queue
-- Mock APIs
-- Single process
-- Handles: 15-50 appointments concurrently
-
-### Phase 2 (Production):
-- Redis event queue
-- Real API connections
-- Multi-process
-- Handles: 100s of appointments concurrently
-
-### Phase 3 (Enterprise):
-- Distributed event bus (Kafka/RabbitMQ)
-- Microservices (each agent = service)
-- Kubernetes deployment
-- Handles: 1000s of appointments concurrently
-
-## Security & Compliance
-
-### HIPAA Compliance
-
-- **PHI Protection:** All patient data encrypted in transit and at rest
-- **Audit Logging:** Complete audit trail of all data access
-- **Access Control:** Role-based access to sensitive data
-- **Data Retention:** 7-year retention per HIPAA requirements
-
-### Authentication & Authorization
-
-```
-Future Implementation:
-- OAuth2 for API authentication
-- JWT tokens for session management
-- Role-based access control (RBAC)
-- API key rotation policies
-```
-
-## Extension Points
-
-### Adding a New Agent
-
-1. Create agent class inheriting from base
-2. Implement `execute()` method
-3. Subscribe to relevant events
-4. Emit events for downstream agents
-5. Update workflow graph to include new node
-
-### Adding a New LLM Provider
-
-1. Create adapter in `adapters/llm/`
-2. Implement `LLMProvider` interface
-3. Update `config/llm_config.yaml`
-4. Change one line: `provider: new_provider`
-
-### Adding a New API Backend
-
-1. Create backend module in `mcp_servers/domain_api/`
-2. Implement same interface as mock
-3. Update `config/mcp_servers.yaml`
-4. Change one line: `BACKEND: new_backend`
-
-### Adding a New Workflow
-
-1. Create new knowledge documents
-2. Define workflow stages in markdown
-3. LLM reads and executes dynamically
-4. No code changes required!
-
-## Technology Stack
-
-### Production Infrastructure:
-- **LLM Gateway:** LiteLLM (unified API for 100+ providers)
-- **Observability:** LangFuse (tracing, prompts, analytics)
-- **Primary LLM:** Anthropic Claude Sonnet 4
-- **Fallback LLMs:** OpenAI GPT-4, Google Gemini Pro
-- **Local Dev:** Ollama (free, no API key)
-
-### Core:
-- **Language:** Python 3.11+
-- **Workflow:** LangGraph
-- **MCP:** Anthropic MCP SDK
-
-### Libraries:
-- `litellm` - LLM gateway/router
-- `langfuse` - Observability & prompt management
-- `langgraph` - Workflow orchestration
-- `mcp` - MCP server/client
-- `pydantic` - Data validation
-- `pyyaml` - Configuration
-- `pypdf2` - PDF parsing
-
-### Development:
-- `pytest` - Testing
-- `black` - Code formatting
-- `mypy` - Type checking
-
-## Performance Targets
-
-| Metric | MVP Target | Production Target |
-|--------|-----------|------------------|
-| Trigger Detection | <30 sec | <10 sec |
-| Filtering + Scoring | <15 sec per appointment | <5 sec |
-| Consent Wait | 24 hours (timeout) | 24 hours |
-| Backfill | <6 hours | <2 hours |
-| Total Resolution | <8 hours average | <4 hours average |
-| Concurrent Appointments | 15-50 | 500+ |
-| System Uptime | 95% | 99.5% |
-
-## Monitoring & Observability
-
-### Metrics to Track
-
-- **Performance:** Agent execution times, API response times
-- **Business:** Success rates, revenue preserved, patient satisfaction
-- **System:** CPU/Memory usage, event queue depth, error rates
-- **Compliance:** POC validation rate, payer rule violations
-
-### Logging Levels
-
-- **DEBUG:** Detailed execution traces
-- **INFO:** Key business events
-- **WARNING:** Recoverable issues
-- **ERROR:** System failures
-- **AUDIT:** All patient data access
-
-## Deployment Architecture
-
-### MVP (Local):
-```
-Single Machine
-├── Python Process
-│   ├── Orchestrator
-│   ├── Agents
-│   └── Event Queue (in-memory)
-├── MCP Server 1 (Knowledge)
-└── MCP Server 2 (Domain API)
-```
-
-### Production (Cloud):
-```
-Kubernetes Cluster
-├── Pod: Orchestrator (LangGraph)
-├── Pod: Agent Pool (3 replicas)
-├── Pod: Knowledge MCP Server
-├── Pod: Domain API MCP Server
-├── Service: Redis (Event Bus)
-└── Service: PostgreSQL (Audit Logs)
-```
-
+- `SDUIRenderer` is a React component
+- Receives `spec` prop (object or fetch URL)
+- Renders inside static layout (Header, Footer)

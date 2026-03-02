@@ -1,0 +1,94 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2, "style": { "maxWidth": 720 } },
+  "children": [
+    {
+      "type": "Message",
+      "props": {
+        "content": "Sure, here is Sarah Johnson's referral form",
+        "timestamp": "9:30 am"
+      }
+    },
+    {
+      "type": "DocumentPreviewCard",
+      "props": { "title": "WebPT PHYSICAL THERAPY REFERRAL FORM" },
+      "children": [
+        {
+          "type": "Column",
+          "props": { "spacing": 1.5 },
+          "children": [
+            {
+              "type": "Text",
+              "props": {
+                "value": "PATIENT INFORMATION",
+                "variant": "caption",
+                "sx": { "bgcolor": "grey.800", "color": "white", "px": 1.5, "py": 0.75, "fontWeight": 700, "letterSpacing": 1 }
+              }
+            },
+            { "type": "Text", "props": { "value": "Patient Name: Sarah Johnson", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+            { "type": "Text", "props": { "value": "Date of Birth: 05/12/1985", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+            { "type": "Text", "props": { "value": "Phone: (555) 123-4567", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+            { "type": "Text", "props": { "value": "Diagnosis: Low Back Pain, Sciatica", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+            { "type": "Text", "props": { "value": "Insurance: Blue Cross Blue Shield", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+            { "type": "Text", "props": { "value": "Date of Injury / Onset:", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5, "color": "text.secondary" } } },
+            {
+              "type": "Text",
+              "props": {
+                "value": "REFERRED BY",
+                "variant": "caption",
+                "sx": { "bgcolor": "grey.800", "color": "white", "px": 1.5, "py": 0.75, "fontWeight": 700, "letterSpacing": 1, "mt": 1 }
+              }
+            },
+            { "type": "Text", "props": { "value": "Referring Physician: Dr. Chris David", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+            { "type": "Text", "props": { "value": "Phone: (555) 987-6543", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+            { "type": "Text", "props": { "value": "Fax: (555) 987-1234", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+            { "type": "Text", "props": { "value": "Clinic:", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5, "color": "text.secondary" } } },
+            {
+              "type": "Text",
+              "props": {
+                "value": "PRESCRIPTION FOR PHYSICAL THERAPY",
+                "variant": "caption",
+                "sx": { "bgcolor": "grey.800", "color": "white", "px": 1.5, "py": 0.75, "fontWeight": 700, "letterSpacing": 1, "mt": 1 }
+              }
+            },
+            { "type": "Text", "props": { "value": "Evaluation and Treat: ✓", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Row",
+      "props": { "spacing": 1, "flexWrap": "wrap" },
+      "children": [
+        {
+          "type": "Button",
+          "props": { "label": "Complete Registration", "variant": "contained", "disabled": true }
+        },
+        {
+          "type": "Select",
+          "props": {
+            "label": "Request Revised Form",
+            "options": [
+              { "value": "missing", "label": "Information missing" },
+              { "value": "legible", "label": "Form not legible" },
+              { "value": "custom", "label": "Send custom message" }
+            ]
+          },
+          "actions": {
+            "onChange": { "type": "navigate", "to": "/screen/4", "whenValue": "missing" }
+          }
+        },
+        {
+          "type": "Button",
+          "props": { "label": "Upload Revised Referral Form", "variant": "outlined" },
+          "action": { "type": "emit", "event": "upload-referral" }
+        },
+        {
+          "type": "Button",
+          "props": { "label": "Next Referral in Queue", "variant": "outlined" },
+          "action": { "type": "emit", "event": "next-referral" }
+        }
+      ]
+    }
+  ]
+}

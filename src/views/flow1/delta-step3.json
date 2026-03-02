@@ -1,0 +1,15 @@
+[
+  {
+    "type": "Message",
+    "props": {
+      "header": "Here is your message for Dr. Chris David's clinic. You can send it now to get updated referral form.",
+      "content": "Dear Team,\n\nWe received the referral form for the above-mentioned patient; however, the document is not clearly legible, and some details cannot be accurately interpreted. To ensure timely processing and avoid any delays in patient care, could you please share a clearer copy of the referral form at your earliest convenience?\n\nThank you for your prompt support.",
+      "timestamp": "9:32 am",
+      "actions": [
+        { "icon": "mail", "action": { "type": "navigate", "to": "/screen/4" } },
+        { "icon": "chat", "disabled": true },
+        { "icon": "document", "disabled": true }
+      ]
+    }
+  }
+]

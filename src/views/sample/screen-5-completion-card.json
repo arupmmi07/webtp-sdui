@@ -1,0 +1,29 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2 },
+  "children": [
+    {
+      "type": "Card",
+      "props": { "variant": "outlined", "sx": { "p": 3 } },
+      "children": [
+        {
+          "type": "Column",
+          "props": { "spacing": 1.5 },
+          "children": [
+            { "type": "Text", "props": { "value": "Referral workflow complete", "variant": "h6", "fontWeight": 600 } },
+            { "type": "Text", "props": { "value": "All referrals have been processed. Ready to review schedules.", "variant": "body2", "color": "text.secondary" } },
+            { "type": "Divider" },
+            {
+              "type": "Row",
+              "props": { "spacing": 2 },
+              "children": [
+                { "type": "Button", "props": { "label": "View Schedules", "variant": "contained" }, "action": { "type": "navigate", "to": "/screen/6" } },
+                { "type": "Button", "props": { "label": "Dashboard", "variant": "outlined" }, "action": { "type": "navigate", "to": "/screen/1" } }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

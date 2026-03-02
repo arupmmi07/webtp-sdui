@@ -1,0 +1,83 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2, "style": { "maxWidth": 720 } },
+  "children": [
+    {
+      "type": "Message",
+      "props": {
+        "avatar": "U",
+        "content": "Show me all pending referrals one by one",
+        "timestamp": "9:30 am",
+        "sx": { "alignSelf": "flex-start" }
+      }
+    },
+    {
+      "type": "Message",
+      "props": { "timestamp": "9:30 am" },
+      "children": [
+        {
+          "type": "Card",
+          "props": {
+            "variant": "outlined",
+            "elevation": 0,
+            "sx": { "bgcolor": "#fff", "borderColor": "grey.300", "p": 2 }
+          },
+          "children": [
+            {
+              "type": "Column",
+              "props": { "spacing": 1.5 },
+              "children": [
+                {
+                  "type": "Text",
+                  "props": { "value": "Sarah Johnson", "variant": "subtitle1", "fontWeight": 700 }
+                },
+                {
+                  "type": "Row",
+                  "props": { "spacing": 2, "flexWrap": "wrap" },
+                  "children": [
+                    { "type": "Text", "props": { "value": "Dr. Chris David", "variant": "body2", "color": "text.secondary" } },
+                    { "type": "Text", "props": { "value": "23 Feb, 2026", "variant": "body2", "color": "text.secondary" } }
+                  ]
+                },
+                {
+                  "type": "Text",
+                  "props": {
+                    "value": "AI Assistant could not read complete all information",
+                    "variant": "body2",
+                    "sx": { "color": "error.main", "fontWeight": 500 }
+                  }
+                },
+                {
+                  "type": "Row",
+                  "props": { "spacing": 1, "flexWrap": "wrap", "sx": { "mt": 1 } },
+                  "children": [
+                    {
+                      "type": "Button",
+                      "props": { "label": "Complete Registration", "variant": "contained" },
+                      "action": { "type": "navigate", "to": "/screen/3" }
+                    },
+                    {
+                      "type": "Button",
+                      "props": { "label": "Preview Referral Form", "variant": "text", "color": "primary" },
+                      "action": { "type": "emit", "event": "preview-referral" }
+                    },
+                    {
+                      "type": "Button",
+                      "props": { "label": "Upload Revised Referral Form", "variant": "text", "color": "primary" },
+                      "action": { "type": "emit", "event": "upload-referral" }
+                    },
+                    {
+                      "type": "Button",
+                      "props": { "label": "Next Referral in Queue", "variant": "text", "color": "primary" },
+                      "action": { "type": "emit", "event": "next-referral" }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

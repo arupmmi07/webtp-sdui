@@ -1,0 +1,56 @@
+[
+  {
+    "type": "Message",
+    "props": {
+      "timestamp": "9:36 am",
+      "bubbleSx": { "bgcolor": "grey.100", "borderColor": "divider" }
+    },
+    "children": [
+      {
+        "type": "StatusMessage",
+        "props": {
+          "message": "Email sent. You have successfully resolved all pending referrals.",
+          "severity": "success",
+          "sx": {
+            "bgcolor": "transparent",
+            "px": 0,
+            "py": 0,
+            "& .MuiAlert-icon": { "color": "success.main" },
+            "& .MuiAlert-message": { "color": "success.main", "fontWeight": 500 }
+          }
+        }
+      },
+      {
+        "type": "Text",
+        "props": {
+          "value": "Next: Schedules to Review",
+          "variant": "body2",
+          "sx": { "fontWeight": 700, "mt": 1 }
+        }
+      },
+      {
+        "type": "Text",
+        "props": {
+          "value": "Out of 20 referrals I have scheduled 15 appointments. Would you like to review them?",
+          "variant": "body2",
+          "sx": { "mt": 0.5 }
+        }
+      },
+      {
+        "type": "Button",
+        "props": {
+          "label": "Yes, Show These Appointments",
+          "variant": "contained",
+          "sx": {
+            "backgroundColor": "#785EF0",
+            "color": "white",
+            "mt": 2,
+            "alignSelf": "center",
+            "&:hover": { "backgroundColor": "#6b4ed9" }
+          }
+        },
+        "action": { "type": "navigate", "to": "/screen/6" }
+      }
+    ]
+  }
+]

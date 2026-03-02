@@ -1,0 +1,36 @@
+{
+  "type": "Row",
+  "props": { "spacing": 3, "alignItems": "flex-start", "flexWrap": "wrap" },
+  "children": [
+    {
+      "type": "Column",
+      "props": { "spacing": 2, "sx": { "flex": 1, "minWidth": 300 } },
+      "children": [
+        {
+          "type": "Message",
+          "props": {
+            "content": "Your message is ready. Review and send when ready.",
+            "timestamp": "9:32 am"
+          }
+        },
+        {
+          "type": "Message",
+          "props": {
+            "content": "We received the referral; however, the document is not clearly legible. Could you please share a clearer copy?",
+            "timestamp": ""
+          }
+        }
+      ]
+    },
+    {
+      "type": "Column",
+      "props": { "spacing": 1, "sx": { "minWidth": 200 } },
+      "children": [
+        { "type": "Text", "props": { "value": "Actions", "variant": "subtitle2" } },
+        { "type": "Divider" },
+        { "type": "Button", "props": { "label": "Send Now", "variant": "contained" }, "action": { "type": "navigate", "to": "/screen/4" } },
+        { "type": "Button", "props": { "label": "Cancel", "variant": "outlined" } }
+      ]
+    }
+  ]
+}

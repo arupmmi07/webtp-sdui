@@ -1,0 +1,42 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2 },
+  "children": [
+    {
+      "type": "Message",
+      "props": {
+        "content": "Ready to send the request to Dr. Chen's clinic.",
+        "timestamp": "9:32 am"
+      }
+    },
+    {
+      "type": "Card",
+      "props": { "variant": "outlined", "sx": { "p": 2 } },
+      "children": [
+        {
+          "type": "Column",
+          "props": { "spacing": 1 },
+          "children": [
+            { "type": "Text", "props": { "value": "Message to send", "variant": "subtitle2", "fontWeight": 600 } },
+            {
+              "type": "Text",
+              "props": {
+                "value": "Dear Team, Please provide a clearer copy of the referral form. Thank you.",
+                "variant": "body2",
+                "color": "text.secondary"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Row",
+      "props": { "spacing": 1 },
+      "children": [
+        { "type": "Button", "props": { "label": "Send Mail", "variant": "contained" }, "action": { "type": "navigate", "to": "/screen/4" } },
+        { "type": "Button", "props": { "label": "Edit Message", "variant": "outlined" } }
+      ]
+    }
+  ]
+}

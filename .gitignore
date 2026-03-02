@@ -57,6 +57,10 @@ dmypy.json
 # Ruff
 .ruff_cache/
 
+# Node
+node_modules/
+*.tsbuildinfo
+
 # Project specific
 *.pdf
 temp/

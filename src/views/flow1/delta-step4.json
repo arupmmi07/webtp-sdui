@@ -1,0 +1,45 @@
+[
+  {
+    "type": "Message",
+    "props": {
+      "timestamp": "9:33 am",
+      "bubbleSx": {
+        "bgcolor": "white",
+        "borderColor": "grey.200",
+        "boxShadow": "0 1px 3px rgba(0,0,0,0.08)"
+      }
+    },
+    "children": [
+      {
+        "type": "StatusMessage",
+        "props": {
+          "message": "Email successfully sent to Dr. Chris David's clinic to share Sarah Johnson's updated referral form.",
+          "severity": "success",
+          "sx": {
+            "bgcolor": "transparent",
+            "px": 0,
+            "py": 0,
+            "& .MuiAlert-icon": { "color": "success.main" },
+            "& .MuiAlert-message": { "color": "success.main", "fontWeight": 500 }
+          }
+        }
+      },
+      {
+        "type": "Button",
+        "props": {
+          "label": "Next Pending Referral",
+          "variant": "contained",
+          "size": "small",
+          "sx": {
+            "backgroundColor": "#3B00FF",
+            "color": "white",
+            "fontWeight": 700,
+            "alignSelf": "flex-start",
+            "&:hover": { "backgroundColor": "#3200e6" }
+          }
+        },
+        "action": { "type": "navigate", "to": "/screen/5" }
+      }
+    ]
+  }
+]

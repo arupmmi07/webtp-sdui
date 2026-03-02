@@ -1,0 +1,48 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2 },
+  "style": { "maxWidth": 640, "mx": "auto" },
+  "children": [
+    {
+      "type": "Row",
+      "props": { "spacing": 2, "alignItems": "center", "flexWrap": "wrap" },
+      "children": [
+        { "type": "GreetingAvatar", "props": { "greeting": "Hi John" } },
+        {
+          "type": "SummaryStat",
+          "props": {
+            "items": [
+              { "label": "Today", "value": "28" },
+              { "label": "Pending", "value": "2" }
+            ],
+            "valueFirst": true,
+            "spacing": 2
+          }
+        }
+      ]
+    },
+    {
+      "type": "Text",
+      "props": {
+        "value": "All reminders sent. 2 referrals require review.",
+        "variant": "body2",
+        "color": "text.secondary"
+      }
+    },
+    {
+      "type": "Alert",
+      "props": {
+        "message": "I couldn't complete processing for 2 referrals. Please review them.",
+        "severity": "info"
+      }
+    },
+    {
+      "type": "Row",
+      "props": { "spacing": 1 },
+      "children": [
+        { "type": "Button", "props": { "label": "Show Referrals", "variant": "contained" }, "action": { "type": "navigate", "to": "/screen/2" } },
+        { "type": "Button", "props": { "label": "View Schedule", "variant": "outlined" }, "action": { "type": "navigate", "to": "/screen/6" } }
+      ]
+    }
+  ]
+}

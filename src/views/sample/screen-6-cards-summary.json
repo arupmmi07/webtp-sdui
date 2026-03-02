@@ -1,0 +1,64 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2 },
+  "children": [
+    { "type": "Timestamp", "props": { "value": "10:15 am" } },
+    {
+      "type": "SummaryStat",
+      "props": {
+        "items": [
+          { "label": "Today", "value": "4" },
+          { "label": "This week", "value": "12" },
+          { "label": "Needs attention", "value": "2" }
+        ],
+        "valueFirst": true,
+        "spacing": 2
+      }
+    },
+    {
+      "type": "Text",
+      "props": { "value": "Upcoming appointments", "variant": "subtitle1", "fontWeight": 600 }
+    },
+    {
+      "type": "Row",
+      "props": { "spacing": 2, "flexWrap": "wrap" },
+      "children": [
+        {
+          "type": "AppointmentCard",
+          "props": {
+            "patient": "Alex Kim",
+            "doctor": "Dr. Smith",
+            "insurance": "Aetna",
+            "datetime": "Today 2:00 pm",
+            "status": "Valid"
+          }
+        },
+        {
+          "type": "AppointmentCard",
+          "props": {
+            "patient": "Lisa Park",
+            "doctor": "Dr. Wilson",
+            "insurance": "Blue Cross",
+            "datetime": "02 Mar 10:00 am",
+            "statuses": ["Valid", "Expiring"]
+          }
+        },
+        {
+          "type": "AppointmentCard",
+          "props": {
+            "patient": "Tom Brown",
+            "doctor": "Dr. Taylor",
+            "insurance": "Cigna",
+            "datetime": "09 Mar 3:30 pm",
+            "status": "Valid"
+          }
+        }
+      ]
+    },
+    {
+      "type": "Button",
+      "props": { "label": "View Full Schedule", "variant": "outlined" },
+      "action": { "type": "navigate", "to": "/screen/6" }
+    }
+  ]
+}

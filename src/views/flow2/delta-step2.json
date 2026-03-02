@@ -1,0 +1,117 @@
+[
+  {
+    "type": "Row",
+    "props": { "justifyContent": "flex-end" },
+    "children": [
+      {
+        "type": "Message",
+        "props": {
+          "content": "Show me all pending referrals one by one",
+          "timestamp": "9:30 am",
+          "avatar": "User",
+          "bubbleSx": { "bgcolor": "#e3f2fd", "borderColor": "#90caf9" }
+        }
+      }
+    ]
+  },
+  {
+    "type": "Message",
+    "props": {
+      "timestamp": "9:30 am",
+      "bubbleSx": {
+        "bgcolor": "white",
+        "border": "1px solid",
+        "borderColor": "grey.200",
+        "boxShadow": "0 1px 3px rgba(0,0,0,0.08)",
+        "pt": 2,
+        "px": 2,
+        "pb": 2,
+        "borderRadius": 2
+      }
+    },
+    "children": [
+      {
+        "type": "Column",
+        "props": { "spacing": 1.5 },
+        "children": [
+          {
+            "type": "Text",
+            "props": {
+              "value": "Sarah Johnson",
+              "variant": "subtitle1",
+              "sx": { "fontWeight": 700 }
+            }
+          },
+          {
+            "type": "IconLabel",
+            "props": { "icon": "people", "label": "Dr. Chris David" }
+          },
+          {
+            "type": "IconLabel",
+            "props": { "icon": "calendar", "label": "23 Feb, 2026" }
+          },
+          {
+            "type": "StatusMessage",
+            "props": {
+              "message": "AI Assistant could not read complete all information",
+              "severity": "error",
+              "sx": {
+                "mt": 1,
+                "py": 0.5,
+                "& .MuiAlert-message": { "color": "error.main", "fontWeight": 500 }
+              }
+            }
+          },
+          {
+            "type": "Row",
+            "props": { "spacing": 1, "flexWrap": "wrap", "sx": { "mt": 2 } },
+            "children": [
+              {
+                "type": "Button",
+                "props": {
+                  "label": "Complete Registration",
+                  "variant": "contained",
+                  "size": "small",
+                  "sx": {
+                    "backgroundColor": "#1e3a5f",
+                    "color": "white",
+                    "&:hover": { "backgroundColor": "#152a47" }
+                  }
+                }
+              },
+              {
+                "type": "Button",
+                "props": {
+                  "label": "Preview Referral Form",
+                  "variant": "text",
+                  "size": "small",
+                  "sx": { "color": "#3B82F6", "textTransform": "none" }
+                },
+                "action": { "type": "navigate", "to": "/screen/4" }
+              },
+              {
+                "type": "Button",
+                "props": {
+                  "label": "Upload Revised Referral Form",
+                  "variant": "text",
+                  "size": "small",
+                  "sx": { "color": "#3B82F6", "textTransform": "none" }
+                }
+              },
+              {
+                "type": "Button",
+                "props": {
+                  "label": "Next Referral in Queue",
+                  "variant": "text",
+                  "size": "small",
+                  "sx": { "color": "#3B82F6", "textTransform": "none" }
+                },
+                "action": { "type": "navigate", "to": "/screen/3" }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

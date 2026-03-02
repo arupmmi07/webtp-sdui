@@ -1,0 +1,40 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2 },
+  "children": [
+    { "type": "Timestamp", "props": { "value": "10:15 am" } },
+    {
+      "type": "FormattedText",
+      "props": {
+        "parts": [
+          { "text": "You have ", "bold": false },
+          { "text": "8 appointments", "bold": true },
+          { "text": " this week.", "bold": false }
+        ],
+        "variant": "body1"
+      }
+    },
+    {
+      "type": "WeeklyAppointmentsView",
+      "props": {
+        "weeks": [
+          {
+            "dateRange": "28 Feb - 06 Mar 2026",
+            "count": 4,
+            "appointments": [
+              { "patient": "Alex Kim", "doctor": "Dr. Smith", "insurance": "Aetna", "datetime": "Today 2:00 pm", "status": "Valid" },
+              { "patient": "Lisa Park", "doctor": "Dr. Wilson", "insurance": "Blue Cross", "datetime": "02 Mar 10:00 am", "status": "Valid" }
+            ]
+          },
+          {
+            "dateRange": "07 - 13 Mar 2026",
+            "count": 4,
+            "appointments": [
+              { "patient": "Tom Brown", "doctor": "Dr. Taylor", "insurance": "Cigna", "datetime": "09 Mar 3:30 pm", "statuses": ["Valid", "Expiring"] }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

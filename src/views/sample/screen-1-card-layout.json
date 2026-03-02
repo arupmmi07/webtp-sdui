@@ -1,0 +1,70 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2 },
+  "style": { "maxWidth": 720, "mx": "auto" },
+  "children": [
+    {
+      "type": "Card",
+      "props": { "variant": "outlined", "sx": { "p": 2 } },
+      "children": [
+        {
+          "type": "Row",
+          "props": { "spacing": 2, "alignItems": "center" },
+          "children": [
+            { "type": "GreetingAvatar", "props": { "greeting": "Good Afternoon John" } }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Card",
+      "props": { "variant": "outlined", "sx": { "p": 2 } },
+      "children": [
+        {
+          "type": "FormattedText",
+          "props": {
+            "parts": [
+              { "text": "Today you have ", "bold": false },
+              { "text": "12 appointments", "bold": true },
+              { "text": " and ", "bold": false },
+              { "text": "5 referrals", "bold": true },
+              { "text": " to review.", "bold": false }
+            ],
+            "variant": "body1"
+          }
+        }
+      ]
+    },
+    {
+      "type": "FormattedAlert",
+      "props": {
+        "severity": "warning",
+        "parts": [
+          { "text": "3 referrals", "bold": true },
+          { "text": " need your attention.", "bold": false }
+        ]
+      }
+    },
+    {
+      "type": "Button",
+      "props": { "label": "Review Pending Referrals", "variant": "contained" },
+      "action": { "type": "navigate", "to": "/screen/2" }
+    },
+    {
+      "type": "Divider"
+    },
+    {
+      "type": "Text",
+      "props": { "value": "Quick actions", "variant": "subtitle2", "color": "text.secondary" }
+    },
+    {
+      "type": "Row",
+      "props": { "spacing": 1, "flexWrap": "wrap" },
+      "children": [
+        { "type": "Button", "props": { "label": "Today's Schedule", "variant": "outlined" }, "action": { "type": "navigate", "to": "/screen/6" } },
+        { "type": "Button", "props": { "label": "Patient Search", "variant": "outlined" } },
+        { "type": "Button", "props": { "label": "Reports", "variant": "outlined" } }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2 },
+  "children": [
+    {
+      "type": "Alert",
+      "props": {
+        "message": "Referral form is not legible. Some fields cannot be read.",
+        "severity": "warning"
+      }
+    },
+    {
+      "type": "StatusMessage",
+      "props": {
+        "message": "Document quality issue detected. Request a clearer copy from the referring provider.",
+        "severity": "warning"
+      }
+    },
+    {
+      "type": "DocumentPreviewCard",
+      "props": { "title": "REFERRAL FORM — Low Quality" },
+      "children": [
+        {
+          "type": "Text",
+          "props": { "value": "Preview unavailable. Please request a new copy.", "variant": "body2", "color": "text.secondary" }
+        }
+      ]
+    },
+    {
+      "type": "Row",
+      "props": { "spacing": 1 },
+      "children": [
+        { "type": "Button", "props": { "label": "Request New Form", "variant": "contained" }, "action": { "type": "navigate", "to": "/screen/3" } },
+        { "type": "Button", "props": { "label": "Skip", "variant": "outlined" } }
+      ]
+    }
+  ]
+}

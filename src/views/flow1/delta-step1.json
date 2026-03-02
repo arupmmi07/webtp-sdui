@@ -1,0 +1,77 @@
+{
+  "type": "Row",
+  "props": {
+    "spacing": 4,
+    "alignItems": "flex-start",
+    "flexWrap": "wrap"
+  },
+  "style": { "maxWidth": 960, "mx": "auto" },
+  "children": [
+    {
+      "type": "Column",
+      "props": { "spacing": 2, "flex": 1, "minWidth": 280 },
+      "children": [
+        {
+          "type": "GreetingAvatar",
+          "props": { "greeting": "Good Morning John" }
+        },
+        {
+          "type": "FormattedText",
+          "props": {
+            "parts": [
+              { "text": "I have analysed that there ", "bold": false },
+              { "text": "28 Appointments", "bold": true },
+              { "text": " schedule for Today and I have sent reminders to all.", "bold": false }
+            ],
+            "variant": "body1"
+          }
+        },
+        {
+          "type": "FormattedAlert",
+          "props": {
+            "severity": "info",
+            "parts": [
+              { "text": "I couldn't complete processing for ", "bold": false },
+              { "text": "2 referrals", "bold": true },
+              { "text": ". Please review them to identify and resolve the issues.", "bold": false }
+            ]
+          }
+        },
+        {
+          "type": "Button",
+          "props": { "label": "Show Me Pending Referrals", "variant": "contained" },
+          "action": { "type": "navigate", "to": "/screen/2" }
+        },
+        {
+          "type": "Text",
+          "props": { "value": "Or Shall I help you with", "variant": "body2", "color": "text.secondary" }
+        },
+        {
+          "type": "Row",
+          "props": { "spacing": 1, "flexWrap": "wrap" },
+          "children": [
+            {
+              "type": "Button",
+              "props": { "label": "Review of My Completed Tasks", "variant": "outlined" },
+              "action": { "type": "emit", "event": "review-tasks" }
+            },
+            {
+              "type": "Button",
+              "props": { "label": "Quick Patient Intake", "variant": "outlined" },
+              "action": { "type": "emit", "event": "patient-intake" }
+            },
+            {
+              "type": "Button",
+              "props": { "label": "Scheduling Appointments", "variant": "outlined" },
+              "action": { "type": "navigate", "to": "/chat", "state": { "step": 6 } }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "DashboardIllustration",
+      "props": { "width": 320, "height": 280 }
+    }
+  ]
+}

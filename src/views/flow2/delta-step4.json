@@ -1,0 +1,137 @@
+[
+  {
+    "type": "Message",
+    "props": {
+      "header": "Sure, here is Sarah Johnson's referral form",
+      "timestamp": "9:30 am",
+      "bubbleSx": { "bgcolor": "grey.50", "pt": 2, "px": 2, "pb": 0 }
+    },
+    "children": [
+      {
+        "type": "DocumentPreviewCard",
+        "props": { "title": "WebPT PHYSICAL THERAPY REFERRAL FORM" },
+        "children": [
+          {
+            "type": "Column",
+            "props": { "spacing": 1.5 },
+            "children": [
+              {
+                "type": "Text",
+                "props": {
+                  "value": "PATIENT INFORMATION",
+                  "variant": "caption",
+                  "sx": { "bgcolor": "grey.800", "color": "white", "px": 1.5, "py": 0.75, "fontWeight": 700, "letterSpacing": 1 }
+                }
+              },
+              { "type": "Text", "props": { "value": "Patient Name: Sarah Johnson", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+              { "type": "Text", "props": { "value": "Date of Birth: 05/12/1985", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+              { "type": "Text", "props": { "value": "Phone: (555) 123-4567", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+              { "type": "Text", "props": { "value": "Diagnosis: Low Back Pain, Sciatica", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+              { "type": "Text", "props": { "value": "Insurance: Blue Cross Blue Shield", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+              { "type": "Text", "props": { "value": "Date of Injury / Onset:", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5, "color": "text.secondary" } } },
+              {
+                "type": "Text",
+                "props": {
+                  "value": "REFERRED BY",
+                  "variant": "caption",
+                  "sx": { "bgcolor": "grey.800", "color": "white", "px": 1.5, "py": 0.75, "fontWeight": 700, "letterSpacing": 1, "mt": 1 }
+                }
+              },
+              { "type": "Text", "props": { "value": "Referring Physician: Dr. Chris David", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+              { "type": "Text", "props": { "value": "Phone: (555) 987-6543", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+              { "type": "Text", "props": { "value": "Fax: (555) 987-1234", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+              { "type": "Text", "props": { "value": "Clinic:", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5, "color": "text.secondary" } } },
+              {
+                "type": "Text",
+                "props": {
+                  "value": "PRESCRIPTION FOR PHYSICAL THERAPY",
+                  "variant": "caption",
+                  "sx": { "bgcolor": "grey.800", "color": "white", "px": 1.5, "py": 0.75, "fontWeight": 700, "letterSpacing": 1, "mt": 1 }
+                }
+              },
+              { "type": "Text", "props": { "value": "Evaluation and Treat: ✓", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } },
+              { "type": "Text", "props": { "value": "Frequency: 1x/week  2-3x/week ✓  3x/week  Other:", "variant": "body2", "sx": { "borderBottom": "1px solid", "borderColor": "divider", "pb": 0.5 } } }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Row",
+        "props": { "spacing": 2, "alignItems": "center", "flexWrap": "wrap", "sx": { "pt": 2, "pb": 2 } },
+        "children": [
+          {
+            "type": "Button",
+            "props": {
+              "label": "Complete Registration",
+              "variant": "contained",
+              "size": "small",
+              "sx": {
+                "backgroundColor": "#2563eb",
+                "color": "white",
+                "&:hover": { "backgroundColor": "#1d4ed8" }
+              }
+            }
+          },
+          {
+            "type": "Select",
+            "props": {
+              "label": "Request Revised Form",
+              "fullWidth": false,
+              "sx": {
+                "minWidth": 180,
+                "& .MuiOutlinedInput-root": {
+                  "backgroundColor": "white",
+                  "color": "#2563eb",
+                  "& .MuiOutlinedInput-notchedOutline": { "border": "none" },
+                  "&:hover .MuiOutlinedInput-notchedOutline": { "border": "none" },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { "border": "none" }
+                },
+                "& .MuiInputLabel-root": { "color": "#2563eb" },
+                "& .MuiInputLabel-root.Mui-focused": { "color": "#2563eb" }
+              },
+              "selectSx": {
+                "& .MuiSelect-select": { "paddingRight": "80px", "fontSize": "0.75rem" },
+                "& .MuiInputBase-input": { "paddingRight": "80px", "fontSize": "0.75rem" },
+                "& .MuiSelect-icon": { "color": "#2563eb", "marginLeft": "32px" }
+              },
+              "menuProps": {
+                "anchorOrigin": { "vertical": "bottom", "horizontal": "left" },
+                "transformOrigin": { "vertical": "top", "horizontal": "left" },
+                "PaperProps": {
+                  "sx": { "maxWidth": 180, "minWidth": 180 }
+                }
+              },
+              "options": [
+                { "value": "missing", "label": "Information Missing" },
+                { "value": "legible", "label": "Fax not Legible" },
+                { "value": "custom", "label": "Send custom message" }
+              ]
+            },
+            "actions": {
+              "onChange": { "type": "navigate", "to": "/screen/5", "whenValue": "missing" }
+            }
+          },
+          {
+            "type": "Button",
+            "props": {
+              "label": "Upload Revised Referral Form",
+              "variant": "text",
+              "size": "small",
+              "sx": { "color": "#3B82F6", "textTransform": "none" }
+            }
+          },
+          {
+            "type": "Button",
+            "props": {
+              "label": "Next Referral in Queue",
+              "variant": "text",
+              "size": "small",
+              "sx": { "color": "#3B82F6", "textTransform": "none" }
+            },
+            "action": { "type": "navigate", "to": "/screen/3" }
+          }
+        ]
+      }
+    ]
+  }
+]

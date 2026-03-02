@@ -1,0 +1,128 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2 },
+  "children": [
+    {
+      "type": "Timestamp",
+      "props": { "value": "9:36 am" }
+    },
+    {
+      "type": "Alert",
+      "props": {
+        "message": "$ Copay not collected for 10:00 AM appointment.",
+        "severity": "warning"
+      }
+    },
+    {
+      "type": "Alert",
+      "props": {
+        "message": "$ Claim rejected — missing modifier for CPT 97110",
+        "severity": "error"
+      }
+    },
+    {
+      "type": "FormattedText",
+      "props": {
+        "parts": [
+          { "text": "Here are the ", "bold": false },
+          { "text": "15", "bold": true },
+          { "text": " appointment scheduled by me out of 20 referrals received.", "bold": false }
+        ],
+        "variant": "body1"
+      }
+    },
+    {
+      "type": "AppointmentsScheduler",
+      "props": {
+        "weeks": [
+          {
+            "dateRange": "26 Feb - 01 Mar 2026",
+            "count": 7,
+            "appointments": [
+              { "patient": "Sarah Johnson", "doctor": "Dr. Smith", "insurance": "Blue Cross PPO", "datetime": "Today 4:30 pm", "status": "Valid" },
+              { "patient": "David Boon", "doctor": "Dr. Anderson", "insurance": "Blue Cross PPO", "datetime": "Today 5:00 pm", "statuses": ["High No-Show", "Valid"] },
+              { "patient": "John Smith", "doctor": "Dr. Wilson", "insurance": "Blue Cross PPO", "datetime": "Today 5:00 pm" }
+            ]
+          },
+          {
+            "dateRange": "02 - 08 Mar 2026",
+            "count": 5,
+            "appointments": [
+              { "patient": "Brian Lee", "doctor": "Dr. Wilson", "insurance": "Blue Cross PPO", "datetime": "03 Mar 4:30 pm", "statuses": ["Valid", "Expiring"] },
+              { "patient": "Jamie Brown", "doctor": "Dr. Smith", "insurance": "Blue Cross PPO", "datetime": "04 Mar 11:30 am", "status": "Valid" },
+              { "patient": "Martha Gracia", "doctor": "Dr. Taylor", "insurance": "Blue Cross PPO", "datetime": "08 Mar 5:00 pm" }
+            ]
+          },
+          {
+            "dateRange": "09 - 15 Mar 2026",
+            "count": 2,
+            "appointments": [
+              { "patient": "Mark Moore", "doctor": "Dr. Thomas", "insurance": "Blue Cross PPO", "datetime": "09 Mar 4:30 pm", "status": "Valid" },
+              { "patient": "David Boon", "doctor": "Dr. Anderson", "insurance": "Blue Cross PPO", "datetime": "Mar 10 5:00 pm", "status": "Invalid" }
+            ]
+          },
+          {
+            "dateRange": "16 - 22 Mar 2026",
+            "count": 4,
+            "appointments": [
+              { "patient": "David Jones", "doctor": "Dr. Taylor", "insurance": "Blue Cross PPO", "datetime": "17 Mar 1:30 pm", "status": "Valid" }
+            ]
+          }
+        ],
+        "days": [
+          {
+            "dateRange": "Today",
+            "count": 3,
+            "appointments": [
+              { "patient": "Sarah Johnson", "doctor": "Dr. Smith", "insurance": "Blue Cross PPO", "datetime": "4:30 pm", "status": "Valid" },
+              { "patient": "David Boon", "doctor": "Dr. Anderson", "insurance": "Blue Cross PPO", "datetime": "5:00 pm", "statuses": ["High No-Show", "Valid"] },
+              { "patient": "John Smith", "doctor": "Dr. Wilson", "insurance": "Blue Cross PPO", "datetime": "5:00 pm" }
+            ]
+          },
+          {
+            "dateRange": "03 Mar 2026",
+            "count": 1,
+            "appointments": [
+              { "patient": "Brian Lee", "doctor": "Dr. Wilson", "insurance": "Blue Cross PPO", "datetime": "4:30 pm", "statuses": ["Valid", "Expiring"] }
+            ]
+          },
+          {
+            "dateRange": "04 Mar 2026",
+            "count": 1,
+            "appointments": [
+              { "patient": "Jamie Brown", "doctor": "Dr. Smith", "insurance": "Blue Cross PPO", "datetime": "11:30 am", "status": "Valid" }
+            ]
+          },
+          {
+            "dateRange": "08 Mar 2026",
+            "count": 1,
+            "appointments": [
+              { "patient": "Martha Gracia", "doctor": "Dr. Taylor", "insurance": "Blue Cross PPO", "datetime": "5:00 pm" }
+            ]
+          },
+          {
+            "dateRange": "09 Mar 2026",
+            "count": 1,
+            "appointments": [
+              { "patient": "Mark Moore", "doctor": "Dr. Thomas", "insurance": "Blue Cross PPO", "datetime": "4:30 pm", "status": "Valid" }
+            ]
+          },
+          {
+            "dateRange": "10 Mar 2026",
+            "count": 1,
+            "appointments": [
+              { "patient": "David Boon", "doctor": "Dr. Anderson", "insurance": "Blue Cross PPO", "datetime": "5:00 pm", "status": "Invalid" }
+            ]
+          },
+          {
+            "dateRange": "17 Mar 2026",
+            "count": 1,
+            "appointments": [
+              { "patient": "David Jones", "doctor": "Dr. Taylor", "insurance": "Blue Cross PPO", "datetime": "1:30 pm", "status": "Valid" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

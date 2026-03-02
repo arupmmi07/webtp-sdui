@@ -1,0 +1,40 @@
+{
+  "type": "Column",
+  "props": { "spacing": 2 },
+  "children": [
+    {
+      "type": "Message",
+      "props": {
+        "content": "All pending referrals have been resolved.",
+        "timestamp": "9:36 am"
+      }
+    },
+    {
+      "type": "SummaryStat",
+      "props": {
+        "items": [
+          { "label": "Resolved today", "value": "5" },
+          { "label": "Emails sent", "value": "3" }
+        ],
+        "valueFirst": true,
+        "spacing": 2
+      }
+    },
+    {
+      "type": "StatusMessage",
+      "props": {
+        "message": "Email sent. You have successfully resolved all pending referrals.",
+        "severity": "success"
+      }
+    },
+    {
+      "type": "Text",
+      "props": { "value": "Would you like to review scheduled appointments?", "variant": "body2", "color": "text.secondary" }
+    },
+    {
+      "type": "Button",
+      "props": { "label": "Yes, Show Appointments", "variant": "contained" },
+      "action": { "type": "navigate", "to": "/screen/6" }
+    }
+  ]
+}

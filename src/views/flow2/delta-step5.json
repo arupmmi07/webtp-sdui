@@ -1,0 +1,15 @@
+[
+  {
+    "type": "Message",
+    "props": {
+      "header": "Here is your message for Dr. Chris David's clinic. You can send it now to get updated referral form.",
+      "content": "Dear Team,\n\nWe noticed that the Date of Injury and Clinic fields are currently blank in Sarah Johnson's referral form.\n\nCould you please update these details and share the revised referral form at your earliest convenience so we can proceed with scheduling and documentation?\n\nThank you for your prompt support.",
+      "timestamp": "9:31 am",
+      "actions": [
+        { "icon": "mail", "action": { "type": "navigate", "to": "/screen/6" } },
+        { "icon": "chat", "disabled": true },
+        { "icon": "document", "disabled": true }
+      ]
+    }
+  }
+]

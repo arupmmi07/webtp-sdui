@@ -1,0 +1,43 @@
+[
+  {
+    "type": "Message",
+    "props": {
+      "timestamp": "10:00 am",
+      "header": "Fantastic Work!",
+      "content": "You cleared the entire referral queue",
+      "bubbleSx": {
+        "bgcolor": "white",
+        "borderColor": "grey.200",
+        "boxShadow": "0 1px 3px rgba(0,0,0,0.08)"
+      },
+      "headerSx": {
+        "fontWeight": 700,
+        "fontSize": "1.1rem",
+        "color": "text.primary"
+      }
+    },
+    "children": [
+      {
+        "type": "DashboardIllustration",
+        "props": { "width": 280, "height": 240 }
+      },
+      {
+        "type": "Alert",
+        "props": {
+          "message": "2 high risk patients need your attention",
+          "severity": "error",
+          "sx": { "py": 0.5 }
+        }
+      },
+      {
+        "type": "Button",
+        "props": {
+          "label": "View Patient Details",
+          "variant": "outlined",
+          "size": "small",
+          "sx": { "borderColor": "#2563eb", "color": "#2563eb" }
+        }
+      }
+    ]
+  }
+]

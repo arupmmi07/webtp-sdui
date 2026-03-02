@@ -1,0 +1,136 @@
+{
+  "type": "Row",
+  "props": {
+    "spacing": 4,
+    "alignItems": "flex-start",
+    "flexWrap": "wrap"
+  },
+  "style": { "maxWidth": 960, "mx": "auto" },
+  "children": [
+    {
+      "type": "Column",
+      "props": { "spacing": 2, "flex": 1, "minWidth": 280 },
+      "children": [
+        {
+          "type": "GreetingAvatar",
+          "props": { "greeting": "Good Morning John" }
+        },
+        {
+          "type": "FormattedText",
+          "props": {
+            "parts": [
+              {
+                "text": "It's going to be a busy day, and your expertise is needed to address urgent exceptions, revenue risk alerts, retention risks, incomplete documentation, and operational bottlenecks.",
+                "bold": false
+              }
+            ],
+            "variant": "body1"
+          }
+        },
+        {
+          "type": "Text",
+          "props": {
+            "value": "Let's start the day with",
+            "variant": "body1",
+            "sx": { "fontWeight": 700 }
+          }
+        },
+        {
+          "type": "Row",
+          "props": { "spacing": 1, "flexWrap": "wrap" },
+          "children": [
+            {
+              "type": "Button",
+              "props": {
+                "label": "5 Referrals in Queue",
+                "variant": "contained",
+                "size": "small",
+                "sx": {
+                  "backgroundColor": "#d32f2f",
+                  "color": "white",
+                  "textTransform": "none",
+                  "&:hover": { "backgroundColor": "#b71c1c" }
+                }
+              },
+              "action": { "type": "navigate", "to": "/screen/2" }
+            },
+            {
+              "type": "Button",
+              "props": {
+                "label": "2 High Risk Patients Not Responded",
+                "variant": "contained",
+                "size": "small",
+                "sx": {
+                  "backgroundColor": "#d32f2f",
+                  "color": "white",
+                  "textTransform": "none",
+                  "&:hover": { "backgroundColor": "#b71c1c" }
+                }
+              }
+            },
+            {
+              "type": "Button",
+              "props": {
+                "label": "5 Referrals Missing Info",
+                "variant": "contained",
+                "size": "small",
+                "sx": {
+                  "backgroundColor": "#2e7d32",
+                  "color": "white",
+                  "textTransform": "none",
+                  "&:hover": { "backgroundColor": "#1b5e20" }
+                }
+              }
+            },
+            {
+              "type": "Button",
+              "props": {
+                "label": "2 Patients Cancelled Appointment",
+                "variant": "contained",
+                "size": "small",
+                "sx": {
+                  "backgroundColor": "#ed6c02",
+                  "color": "white",
+                  "textTransform": "none",
+                  "&:hover": { "backgroundColor": "#e65100" }
+                }
+              }
+            },
+            {
+              "type": "Button",
+              "props": {
+                "label": "8 Auto Scheduling Declined",
+                "variant": "contained",
+                "size": "small",
+                "sx": {
+                  "backgroundColor": "#90caf9",
+                  "color": "#0d47a1",
+                  "textTransform": "none",
+                  "&:hover": { "backgroundColor": "#64b5f6" }
+                }
+              }
+            },
+            {
+              "type": "Button",
+              "props": {
+                "label": "3 Therapists Unavailable Tomorrow",
+                "variant": "contained",
+                "size": "small",
+                "sx": {
+                  "backgroundColor": "#90caf9",
+                  "color": "#0d47a1",
+                  "textTransform": "none",
+                  "&:hover": { "backgroundColor": "#64b5f6" }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "DashboardIllustration",
+      "props": { "width": 320, "height": 280 }
+    }
+  ]
+}
