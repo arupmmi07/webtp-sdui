@@ -1,0 +1,15 @@
+# Render.com Blueprint - SDUI Runtime Renderer
+# Deploy: Connect this repo in Render Dashboard, or use "New > Blueprint"
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: sdui-runtime-renderer
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      # SPA: serve index.html for all routes (React Router)
+      - type: rewrite
+        source: /*
+        destination: /index.html
