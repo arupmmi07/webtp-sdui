@@ -1,5 +1,5 @@
-# Render.com Blueprint - SDUI Runtime Renderer (Node.js / Vite)
-# Deploy: New > Blueprint, connect repo. Delete any existing Python service first.
+# Render.com Blueprint - SDUI Runtime Renderer
+# Deploy: Connect this repo in Render Dashboard, or use "New > Blueprint"
 # Docs: https://render.com/docs/blueprint-spec
 
 services:
@@ -8,9 +8,6 @@ services:
     runtime: static
     buildCommand: npm install && npm run build
     staticPublishPath: dist
-    envVars:
-      - key: NODE_VERSION
-        value: "20"
     routes:
       # SPA: serve index.html for all routes (React Router)
       - type: rewrite
