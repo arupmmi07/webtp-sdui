@@ -19,6 +19,11 @@ export function SDUINodeWrapper({ type, source, children, showAnnotation, showSo
       sx={{
         position: 'relative',
         display: 'block',
+        border: '2px dashed',
+        borderColor: 'primary.main',
+        borderRadius: 1,
+        p: 0.5,
+        mb: 1,
         '&::before': {
           content: `"${badge}"`,
           position: 'absolute',
@@ -37,11 +42,6 @@ export function SDUINodeWrapper({ type, source, children, showAnnotation, showSo
           textTransform: 'uppercase',
           letterSpacing: 0.5,
           whiteSpace: 'nowrap',
-        },
-        '& > *': {
-          outline: '1px dashed',
-          outlineColor: 'primary.main',
-          outlineOffset: -1,
         },
       }}
     >

@@ -8,6 +8,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start": "npm run stop && sleep 2 && vite",
+    "stop": "lsof -ti:5173 | xargs kill -9 2>/dev/null || true",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint ."

@@ -14,6 +14,11 @@ export function StaticSection({ label = 'Static', children, showAnnotation }: St
     <Box
       sx={{
         position: 'relative',
+        border: '2px dashed',
+        borderColor: 'grey.400',
+        borderRadius: 1,
+        p: 0.5,
+        mb: 1,
         '&::before': {
           content: `"${label}"`,
           position: 'absolute',
@@ -31,11 +36,6 @@ export function StaticSection({ label = 'Static', children, showAnnotation }: St
           zIndex: 1,
           textTransform: 'uppercase',
           letterSpacing: 0.5,
-        },
-        '& > *': {
-          outline: '1px dashed',
-          outlineColor: 'grey.300',
-          outlineOffset: -1,
         },
       }}
     >

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDemo } from '@/context/DemoContext'
 import { useActionExecutor } from '@/renderer/ActionContext'
@@ -17,10 +18,14 @@ const SUMMARY_ITEMS = [
 function ChatContent() {
   const chat = useFlow4Chat()
   const navigate = useNavigate()
-  const { loadedSpec } = useDemo()
+  const { loadedSpec, setShowAnnotations } = useDemo()
   const spec = loadedSpec ?? chat?.spec ?? { type: 'Text', props: { value: 'Loading...' } }
   const step = chat?.step ?? 0
   const isScheduler = step === 6
+
+  useEffect(() => {
+    if (step > 0) setShowAnnotations(true)
+  }, [step, setShowAnnotations])
 
   const handleSearchSubmit = () => {
     if (chat?.initiateChat && step === 0) {
