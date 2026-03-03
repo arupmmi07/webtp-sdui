@@ -21,37 +21,6 @@ function HomePage() {
           <Card variant="outlined">
             <CardContent>
               <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                SDUI vs Static
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Header, toolbar, and Search/Ask are <strong>static</strong>. Main content is <strong>SDUI</strong> — driven by JSON.
-              </Typography>
-              <Stack direction="row" spacing={1}>
-                <Button component={Link} to="/chat" state={{ flow: 'flow1' }} variant="contained" size="small">
-                  START FLOW1 (CHAT)
-                </Button>
-                <Button component={Link} to="/chat" state={{ flow: 'flow2' }} variant="contained" size="small">
-                  START FLOW2 (CHAT)
-                </Button>
-              </Stack>
-            </CardContent>
-          </Card>
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                Same Screen, Different Config
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Screen 6: Doctor vs Front Desk — same layout, different JSON. Switch views with no code change.
-              </Typography>
-              <Button component={Link} to="/chat" state={{ flow: 'flow1', step: 6 }} variant="outlined" size="small">
-                Scheduler Demo
-              </Button>
-            </CardContent>
-          </Card>
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                 Add UI Without Redeploy
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
