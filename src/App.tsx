@@ -41,10 +41,10 @@ function HomePage() {
         </Stack>
 
         <Stack direction="row" spacing={2} flexWrap="wrap">
-          <Button component={Link} to="/chat" state={{ flow: 'flow1' }} variant="contained" color="primary" size="large">
+          <Button component={Link} to="/chat" state={{ flow: 'flow1', step: 0 }} variant="contained" color="primary" size="large">
             START FLOW1 (CHAT)
           </Button>
-          <Button component={Link} to="/chat" state={{ flow: 'flow2' }} variant="contained" color="primary" size="large">
+          <Button component={Link} to="/chat" state={{ flow: 'flow2', step: 0 }} variant="contained" color="primary" size="large">
             START FLOW2 (CHAT)
           </Button>
         </Stack>

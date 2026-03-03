@@ -51,6 +51,10 @@ function toNodes(delta: unknown): unknown[] {
 }
 
 function buildChatSpec(flowId: FlowId, throughStep: number, schedulerRole: SchedulerRole): unknown {
+  // Step 0: blank chat — no message to render
+  if (throughStep === 0) {
+    return { type: 'Column', props: { spacing: 2, style: { maxWidth: 720 } }, children: [] }
+  }
   const deltas = FLOW_DELTAS[flowId]
   const step1 = deltas[1]
   if (!step1 || throughStep === 1) return step1
@@ -78,6 +82,7 @@ const Flow4ChatContext = createContext<{
   spec: unknown
   schedulerRole: SchedulerRole
   setSchedulerRole: (r: SchedulerRole) => void
+  initiateChat: () => void
 } | null>(null)
 
 export function useFlow4Chat() {
@@ -99,6 +104,7 @@ export function Flow4ChatProvider({
 }) {
   const [step, setStep] = useState(initialStep)
   const [schedulerRole, setSchedulerRole] = useState<SchedulerRole>(initialSchedulerRole)
+  const initiateChat = useCallback(() => setStep(1), [])
 
   const spec = useMemo(
     () => buildChatSpec(flowId, step, schedulerRole),
@@ -122,8 +128,8 @@ export function Flow4ChatProvider({
   )
 
   const value = useMemo(
-    () => ({ flowId, step, spec, schedulerRole, setSchedulerRole }),
-    [flowId, step, spec, schedulerRole]
+    () => ({ flowId, step, spec, schedulerRole, setSchedulerRole, initiateChat }),
+    [flowId, step, spec, schedulerRole, initiateChat]
   )
 
   return (

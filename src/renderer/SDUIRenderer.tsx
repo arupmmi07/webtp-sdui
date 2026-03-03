@@ -102,7 +102,7 @@ export function SDUIRenderer({ spec }: SDUIRendererProps) {
   const bindAction = createBindAction(execute)
   const nodes = parseSpec(spec)
   if (nodes.length === 0) {
-    return <p>No valid spec to render.</p>
+    return null
   }
 
   const demoOpts = { showAnnotation: showAnnotations, showSource: showComponentSource, isTopLevel: true }

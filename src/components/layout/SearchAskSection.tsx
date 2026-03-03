@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Box, TextField, InputAdornment, IconButton, Typography } from '@mui/material'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import MicIcon from '@mui/icons-material/Mic'
@@ -13,19 +14,41 @@ const DEFAULT_SUMMARY_ITEMS = [
   { label: 'in copays to collect', value: '$1,260' },
 ]
 
+const INITIATE_PHRASES = ['hi', 'hello', 'show me my day']
+
+function matchesInitiatePhrase(value: string): boolean {
+  const normalized = value.trim().toLowerCase()
+  return INITIATE_PHRASES.some((p) => normalized === p || normalized.startsWith(p + ' ') || normalized.endsWith(' ' + p))
+}
+
 interface SearchAskSectionProps {
   summaryItems?: { label: string; value: string }[]
   moreLabel?: string
+  onSearchSubmit?: () => void
 }
 
 /** Search/ask bar and Day's Summary - integrated near main content, not a footer */
-export function SearchAskSection({ summaryItems = DEFAULT_SUMMARY_ITEMS, moreLabel = '+8 More' }: SearchAskSectionProps) {
+export function SearchAskSection({ summaryItems = DEFAULT_SUMMARY_ITEMS, moreLabel = '+8 More', onSearchSubmit }: SearchAskSectionProps) {
+  const [inputValue, setInputValue] = useState('')
+
+  const handleSubmit = () => {
+    const v = inputValue.trim()
+    if (!v) return
+    if (matchesInitiatePhrase(v)) {
+      onSearchSubmit?.()
+      setInputValue('')
+    }
+  }
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, pt: 2, mt: 2, borderTop: 1, borderColor: 'grey.200' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
         <TextField
           size="small"
-          placeholder="Search or ask: patient status, eligibility, copays, scheduling..."
+          placeholder="Search or ask: Hi, Hello, Show me my day..."
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
           variant="outlined"
           sx={{
             flex: 1,
@@ -47,7 +70,9 @@ export function SearchAskSection({ summaryItems = DEFAULT_SUMMARY_ITEMS, moreLab
             ),
             endAdornment: (
               <InputAdornment position="end" sx={{ mr: 0.5 }}>
-                <MicIcon sx={{ fontSize: 20, color: 'primary.main' }} />
+                <IconButton size="small" onClick={handleSubmit} sx={{ p: 0.5 }}>
+                  <MicIcon sx={{ fontSize: 20, color: 'primary.main' }} />
+                </IconButton>
               </InputAdornment>
             ),
           }}

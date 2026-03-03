@@ -10,9 +10,10 @@ interface ScreenLayoutProps {
   toolbar?: React.ReactNode
   summaryItems?: { label: string; value: string }[]
   fullWidth?: boolean
+  onSearchSubmit?: () => void
 }
 
-export function ScreenLayout({ spec, toolbar, summaryItems, fullWidth }: ScreenLayoutProps) {
+export function ScreenLayout({ spec, toolbar, summaryItems, fullWidth, onSearchSubmit }: ScreenLayoutProps) {
   const { showAnnotations } = useDemo()
 
   return (
@@ -34,7 +35,7 @@ export function ScreenLayout({ spec, toolbar, summaryItems, fullWidth }: ScreenL
         )}
         <SDUIRenderer spec={spec} />
         <StaticSection label="Static" showAnnotation={showAnnotations}>
-          <SearchAskSection summaryItems={summaryItems} />
+          <SearchAskSection summaryItems={summaryItems} onSearchSubmit={onSearchSubmit} />
         </StaticSection>
       </Box>
     </AppShell>

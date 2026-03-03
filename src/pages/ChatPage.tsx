@@ -19,8 +19,14 @@ function ChatContent() {
   const navigate = useNavigate()
   const { loadedSpec } = useDemo()
   const spec = chat?.spec ?? { type: 'Text', props: { value: 'Loading...' } }
-  const step = chat?.step ?? 2
+  const step = chat?.step ?? 0
   const isScheduler = step === 6
+
+  const handleSearchSubmit = () => {
+    if (chat?.initiateChat && step === 0) {
+      chat.initiateChat()
+    }
+  }
 
   const toolbar = (
     <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }} flexWrap="wrap">
@@ -52,6 +58,7 @@ function ChatContent() {
       toolbar={toolbar}
       summaryItems={SUMMARY_ITEMS}
       fullWidth={isScheduler}
+      onSearchSubmit={handleSearchSubmit}
     />
   )
 }
@@ -61,7 +68,7 @@ export function ChatPage() {
   const parentExecute = useActionExecutor()
   const state = location.state as { flow?: FlowId; step?: number } | null
   const flowId = state?.flow ?? 'flow1'
-  const initialStep = state?.step ?? 1
+  const initialStep = state?.step ?? 0
 
   return (
     <Flow4ChatProvider parentExecute={parentExecute} flowId={flowId} initialStep={initialStep}>

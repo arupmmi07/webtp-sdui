@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { AppBar, Toolbar, TextField, InputAdornment, IconButton, Avatar, Box, Badge } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import FilterListIcon from '@mui/icons-material/FilterList'
@@ -33,14 +35,36 @@ function WebptLogo() {
   )
 }
 
+const INITIATE_PHRASES = ['hi', 'hello', 'show me my day']
+
+function matchesInitiatePhrase(value: string): boolean {
+  const normalized = value.trim().toLowerCase()
+  return INITIATE_PHRASES.some((p) => normalized === p || normalized.startsWith(p + ' ') || normalized.endsWith(' ' + p))
+}
+
 export function Header() {
+  const navigate = useNavigate()
+  const [searchValue, setSearchValue] = useState('')
+
+  const handleSearchSubmit = () => {
+    const v = searchValue.trim()
+    if (!v) return
+    if (matchesInitiatePhrase(v)) {
+      navigate('/chat', { state: { flow: 'flow1', step: 1 } })
+      setSearchValue('')
+    }
+  }
+
   return (
     <AppBar position="sticky" color="default" elevation={0} sx={{ borderBottom: 1, borderColor: 'grey.300', bgcolor: '#fff' }}>
       <Toolbar sx={{ gap: 1.5, minHeight: 64 }}>
         <WebptLogo />
         <TextField
           size="small"
-          placeholder="Search patients, providers, referrals, authorizations, and appointments..."
+          placeholder="Search or ask: Hi, Hello, Show me my day..."
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit()}
           variant="outlined"
           sx={{
             flex: 1,
@@ -56,7 +80,9 @@ export function Header() {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end" sx={{ mr: 0.5 }}>
-                <SearchIcon sx={{ fontSize: 20, color: 'grey.500' }} />
+                <IconButton size="small" onClick={handleSearchSubmit} sx={{ p: 0.5 }}>
+                  <SearchIcon sx={{ fontSize: 20, color: 'grey.500' }} />
+                </IconButton>
               </InputAdornment>
             ),
           }}
