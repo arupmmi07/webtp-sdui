@@ -2,21 +2,21 @@
 
 ## Vision
 
-Build a **bounded, intentional Runtime UI Composition Engine** for our EMR product. The renderer accepts JSON specs and renders UI dynamically in React, coexisting with normal static UI. First pilot: EMR Scheduler/Calendar.
+Build a **bounded, intentional Runtime UI Composition Engine** for our EMR product. The renderer accepts JSON specs and renders UI dynamically in React, coexisting with normal static UI. First pilot: **Chat interface** simulating two use cases.
 
-**Phase 1**: UI-only test POC — JSON provided directly (static/mock). No backend.  
-**Phase 2**: GraphQL for JSON generation.
+**Phase 1**: UI-only POC — JSON from static files (simulating server). No backend.  
+**Phase 2**: GraphQL for JSON generation; data binding from external API.
 
 ---
 
 ## What We Want
 
-1. **Renderer that accepts JSON** — Predefined object structure with actions, styles, layout. No visual builder.
-2. **Data injection** — JSON defines structure + data binding (dataSource). Browser fetches real data at runtime; renderer injects into components. JSON does NOT carry data.
-3. **Component registry** — Map JSON `type` to components from internal or external libs (MUI, AntD).
-4. **Action abstraction** — JSON defines what happens; code executes it. Enables server-driven behavior changes.
-5. **EMR Scheduler pilot** — Different scenarios (Doctor, Front Desk) from same calendar engine, different composition + actions.
-6. **SDUI + static UI coexist** — Not everything is SDUI. Core flows can stay static; experiments and role-based screens use SDUI.
+1. **Chat simulation** — User initiates (Hi/Hello/Show me my day) → server sends delta JSON → renderer injects into chat context.
+2. **Renderer that accepts JSON** — Parse, validate (future), render. Internal + wrapped external (MUI, FullCalendar) components.
+3. **Static vs Dynamic segregation** — Header, toolbar, Search/Ask = static. Chat content = SDUI (JSON-driven).
+4. **Data binding** — JSON with embedded data (now). JSON + dataSource (future): client fetches from API, injects.
+5. **Component registry** — Map `type` to components. Add new components/libs via wrappers.
+6. **Action abstraction** — JSON defines actions; executor runs (navigate, api, emit, openForm, openDrawer).
 
 ---
 

@@ -90,10 +90,11 @@ src/
 │   └── wrappers/           # CalendarSchedulerWrapper
 ├── schema/
 │   └── v1.ts               # Types, schema definition
-└── scenarios/
-    └── scheduler/          # EMR scheduler specs (JSON)
-        ├── doctor-scheduler.json      # Doctor view spec
-        └── front-desk-scheduler.json  # Front Desk view spec
+└── views/
+    ├── flow1/              # Use case 1: deltas + scheduler
+    │   └── scheduler/       # doctor-scheduler.json, front-desk-scheduler.json
+    ├── flow2/              # Use case 2: deltas
+    └── sample/              # SpecLoaderDialog samples
 ```
 
 ---

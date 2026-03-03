@@ -18,7 +18,7 @@ function ChatContent() {
   const chat = useFlow4Chat()
   const navigate = useNavigate()
   const { loadedSpec } = useDemo()
-  const spec = chat?.spec ?? { type: 'Text', props: { value: 'Loading...' } }
+  const spec = loadedSpec ?? chat?.spec ?? { type: 'Text', props: { value: 'Loading...' } }
   const step = chat?.step ?? 0
   const isScheduler = step === 6
 
