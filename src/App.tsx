@@ -5,10 +5,12 @@ import { DemoProvider } from '@/context/DemoContext'
 import { AppShell } from '@/components/layout/AppShell'
 import { ChatPage } from '@/pages/ChatPage'
 import { DemoToolbar } from '@/components/demo/DemoToolbar'
+import { DemoTips } from '@/components/demo/DemoTips'
 
 function HomePage() {
   return (
     <AppShell>
+      <DemoTips home />
       <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
         <Typography variant="h5" fontWeight={700} sx={{ mb: 2 }}>
           SDUI Runtime Renderer — Demo

@@ -6,6 +6,7 @@ import { Button, Stack, Typography } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { ScreenLayout } from '@/components/layout/ScreenLayout'
 import { SegmentedControl } from '@/components/wrappers/SegmentedControl'
+import { DemoTips } from '@/components/demo/DemoTips'
 import { Flow4ChatProvider, useFlow4Chat, type FlowId, type SchedulerRole } from '@/context/Flow4ChatContext'
 
 const SUMMARY_ITEMS = [
@@ -58,13 +59,16 @@ function ChatContent() {
   )
 
   return (
-    <ScreenLayout
-      spec={spec}
-      toolbar={toolbar}
-      summaryItems={SUMMARY_ITEMS}
-      fullWidth={isScheduler}
-      onSearchSubmit={handleSearchSubmit}
-    />
+    <>
+      {loadedSpec == null && <DemoTips flowId={chat?.flowId ?? 'flow1'} step={step} />}
+      <ScreenLayout
+        spec={spec}
+        toolbar={toolbar}
+        summaryItems={SUMMARY_ITEMS}
+        fullWidth={isScheduler}
+        onSearchSubmit={handleSearchSubmit}
+      />
+    </>
   )
 }
 
