@@ -103,12 +103,12 @@
               },
               "options": [
                 { "value": "missing", "label": "Information Missing" },
-                { "value": "legible", "label": "Fax not Legible" },
+                { "value": "legible", "label": "Form not legible" },
                 { "value": "custom", "label": "Send custom message" }
               ]
             },
             "actions": {
-              "onChange": { "type": "navigate", "to": "/screen/5", "whenValue": "missing" }
+              "onChange": { "type": "navigate", "to": "/screen/5", "whenValue": "legible" }
             }
           },
           {

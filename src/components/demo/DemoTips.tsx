@@ -7,7 +7,7 @@ import type { FlowId } from '@/context/Flow4ChatContext'
 const FLOW1_TIPS: Record<number, string> = {
   0: "Type **Hi**, **Hello**, or **Show me my day** in the Search/Ask bar below and press Enter to start.",
   1: "Click **Show Me Pending Referrals** to view the referral form.",
-  2: "Select **Form not legible** in the dropdown to request a revised form.",
+  2: "Open the **Request Revised Form** dropdown and select **Form not legible**.",
   3: "Click the **mail icon** to send the message.",
   4: "Review the confirmation. Click **Continue** or next action to proceed.",
   5: "You're almost done. Proceed to the scheduler view.",
@@ -17,11 +17,11 @@ const FLOW1_TIPS: Record<number, string> = {
 const FLOW2_TIPS: Record<number, string> = {
   0: "Type **Hi**, **Hello**, or **Show me my day** in the Search/Ask bar below and press Enter to start.",
   1: "Click **5 Referrals in Queue** or any option to continue.",
-  2: "Follow the on-screen actions to proceed.",
-  3: "Continue through the flow steps.",
-  4: "Continue through the flow steps.",
-  5: "Continue through the flow steps.",
-  6: "Continue through the flow steps.",
+  2: "Select **Preview Referral Form** to view the referral.",
+  3: "Click **Next Referral in Queue** or continue as needed.",
+  4: "Open the **Request Revised Form** dropdown and select **Form not legible**.",
+  5: "Click the **mail icon** to send the message.",
+  6: "Review the confirmation. Click **Next Referral in Queue** to proceed.",
   7: "You've completed Flow 2.",
 }
 
